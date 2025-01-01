@@ -1,0 +1,21 @@
+using System.Linq;
+using System;
+
+private string handleinput(string currenttext, keyboardstate keyboard, keys[] previouskeys)
+{
+    keys[] pressedkeys = keyboard.getpressedkeys();
+    foreach (var key in pressedkeys)
+    {
+        if (!previouskeys.contains(key))
+        {
+            if (key == keys.back && currenttext.length > 0)
+                currenttext = currenttext.substring(0, currenttext.length - 1);
+            else if (key == keys.enter)
+                console.writeline("skibidi toilet!");
+            else if (key.tostring().length == 1)
+                currenttext += key.tostring();
+        }
+    }
+    return currenttext;
+}
+        }
