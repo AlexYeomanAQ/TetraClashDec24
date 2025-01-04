@@ -12,14 +12,15 @@ namespace TetraClashDec24
         private SpriteBatch spriteBatch;
 
         private GameState _currentState;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
 
-            graphics.PreferredBackBufferWidth = 2560;
-            graphics.PreferredBackBufferHeight = 1440;
+            graphics.PreferredBackBufferWidth = 1920;
+            graphics.PreferredBackBufferHeight = 1080;
             graphics.ApplyChanges();
         }
 
