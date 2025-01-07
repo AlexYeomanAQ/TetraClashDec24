@@ -9,7 +9,9 @@ public class CreateAccountState : GameState
 {
 
     private InputButton usernameBox;
+    private string UBDefaultString = "Enter Username";
     private InputButton passwordBox;
+    private string PBDefaultString = "Enter Password";
     private Button submitButton;
 
     private string username = "";
@@ -36,10 +38,10 @@ public class CreateAccountState : GameState
 
     public override void LoadContent()
     {
-        usernameBox = new InputButton(inputTexturePath, 380, 490, 200, 100, Color.White, "Enter Username");
+        usernameBox = new InputButton(inputTexturePath, 380, 490, 200, 100, Color.White, UBDefaultString);
         usernameBox.LoadContent(Game.Content);
 
-        passwordBox = new InputButton(inputTexturePath, 1340, 490, 200, 100, Color.White, "Enter Password");
+        passwordBox = new InputButton(inputTexturePath, 1340, 490, 200, 100, Color.White, UBDefaultString);
         passwordBox.LoadContent(Game.Content);
 
         submitButton = new Button(inputTexturePath, 860, 760, 200, 100, Color.White, "Submit!");
@@ -89,10 +91,18 @@ public class CreateAccountState : GameState
         if (focusedField != InputField.Username)
         {
             usernameBox.highlighted = false;
+            if (username == "")
+            {
+                usernameBox.Text = UBDefaultString;
+            }
         }
         if (focusedField != InputField.Password)
         {
             passwordBox.highlighted = false;
+            if (password == "")
+            {
+                passwordBox.Text = UBDefaultString;
+            }
         }
         prevClickState = mouse.LeftButton;
     }

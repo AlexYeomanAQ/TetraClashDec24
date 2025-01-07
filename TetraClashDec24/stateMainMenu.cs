@@ -28,7 +28,7 @@ public class MainMenuState : GameState
             Point mousePosition = new Point(mouse.X, mouse.Y);
             if (PlayButton.Box.Contains(mousePosition))
             {
-                Game.ChangeState(new SettingsState(Game, mouse.LeftButton));
+                Game.ChangeState(new SearchState(Game, mouse.LeftButton));
             }
         }
         prevClickState = mouse.LeftButton;

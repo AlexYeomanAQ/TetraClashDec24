@@ -5,7 +5,6 @@ using Microsoft.Xna.Framework.Graphics;
 
 public class MainGameState : GameState
 {
-    Button TestButton;
 
     private ButtonState prevClickState;
     public MainGameState (Game1 game, ButtonState clickState) : base(game)
@@ -15,8 +14,7 @@ public class MainGameState : GameState
 
     public override void LoadContent()
     {
-        TestButton = new Button(@"base", 100, 100, 500, 500, Color.White, "Template");
-        TestButton.LoadContent(Game.Content);
+
     }
 
     public override void Update(GameTime gameTime)
@@ -26,10 +24,7 @@ public class MainGameState : GameState
         if (mouse.LeftButton == ButtonState.Pressed)
         {
             Point mousePosition = new Point(mouse.X, mouse.Y);
-            if (TestButton.Box.Contains(mousePosition))
-            {
-                Game.ChangeState(new SettingsState(Game, mouse.LeftButton));
-            }
+            
         }
     }
 
@@ -38,7 +33,7 @@ public class MainGameState : GameState
         Game.GraphicsDevice.Clear(Color.CornflowerBlue);
         SpriteBatch spriteBatch = new SpriteBatch(Game.GraphicsDevice);
         spriteBatch.Begin();
-        TestButton.Draw(spriteBatch);
+
         spriteBatch.End();
     }
 }

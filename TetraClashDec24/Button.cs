@@ -20,7 +20,6 @@ namespace TetraClashDec24
             TexturePath = filePath;
             Colour = colour;
             Text = text;
-
         }
 
         public override void LoadContent(ContentManager Content)
