@@ -32,7 +32,7 @@ namespace TetraClashDec24
 
             if (File.Exists(cachePath))
             {
-                _currentState = new CreateAccountState(this, mouse.LeftButton);
+                _currentState = new LoginState(this, mouse.LeftButton);
             }
             else
             {

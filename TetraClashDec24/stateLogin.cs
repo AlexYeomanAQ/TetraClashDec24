@@ -7,7 +7,7 @@ using System;
 using System.Net.Cache;
 using System.Net.Security;
 
-public class CreateAccountState : GameState
+public class LoginState : GameState
 {
 
     private InputButton usernameBox;
@@ -17,7 +17,7 @@ public class CreateAccountState : GameState
     private string PBDefaultString = "Enter Password";
 
     private Button submitButton;
-    private Button loginButton;          
+    private Button createAccountButton;
 
     private string username = "";
     private string password = "";
@@ -33,10 +33,10 @@ public class CreateAccountState : GameState
     ButtonState prevClickState;
 
     bool isCapsLockOn = false;
-    private enum InputField {None, Username, Password}
-    private InputField focusedField = InputField.None; 
+    private enum InputField { None, Username, Password }
+    private InputField focusedField = InputField.None;
 
-    public CreateAccountState(Game1 game, ButtonState clickState) : base(game)
+    public LoginState(Game1 game, ButtonState clickState) : base(game)
     {
         prevClickState = clickState;
     }
@@ -59,7 +59,7 @@ public class CreateAccountState : GameState
         prevKeyboardState = keyboard;
         mouse = Mouse.GetState();
         keyboard = Keyboard.GetState();
-        
+
         if (mouse.LeftButton == ButtonState.Pressed && prevClickState != mouse.LeftButton)
         {
             Point mousePosition = new Point(mouse.X, mouse.Y);
@@ -75,7 +75,7 @@ public class CreateAccountState : GameState
             {
                 string salt = Security.GenerateSalt();
                 string hash = Security.GenerateHash(password, salt);
-                string message = $"create{username}:{hash}:{salt}";
+                string message = $"login{username}:{hash}:{salt}";
                 Client.sendMessage(message);
                 Game.ChangeState(new MainMenuState(Game, mouse.LeftButton));
             }
@@ -86,7 +86,7 @@ public class CreateAccountState : GameState
         }
 
         if (focusedField == InputField.Username)
-        { 
+        {
             username = HandleInput(username, keyboard, prevKeyboardState, ref isCapsLockOn);
             usernameBox.Text = username;
             usernameBox.highlighted = true;
@@ -189,3 +189,4 @@ public class CreateAccountState : GameState
         return currentText;
     }
 }
+
