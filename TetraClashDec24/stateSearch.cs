@@ -41,7 +41,6 @@ namespace TetraClashDec24
 
         public override void Draw(GameTime gameTime)
         {
-            Game.GraphicsDevice.Clear(Color.CornflowerBlue);
             SpriteBatch spriteBatch = new SpriteBatch(Game.GraphicsDevice);
             spriteBatch.Begin();
             Vector2 textSize = SearchFont.MeasureString("Searching");

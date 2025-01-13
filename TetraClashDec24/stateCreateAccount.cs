@@ -138,7 +138,6 @@ public class CreateAccountState : GameState
 
     public override void Draw(GameTime gameTime)
     {
-        Game.GraphicsDevice.Clear(Color.CornflowerBlue);
         SpriteBatch spriteBatch = new SpriteBatch(Game.GraphicsDevice);
         spriteBatch.Begin();
         usernameBox.Draw(spriteBatch);

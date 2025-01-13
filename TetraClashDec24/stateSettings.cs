@@ -36,7 +36,6 @@ public class SettingsState : GameState
 
     public override void Draw(GameTime gameTime)
     {
-        Game.GraphicsDevice.Clear(Color.CornflowerBlue);
         SpriteBatch spriteBatch = new SpriteBatch(Game.GraphicsDevice);
         spriteBatch.Begin();
         TestButton.Draw(spriteBatch);

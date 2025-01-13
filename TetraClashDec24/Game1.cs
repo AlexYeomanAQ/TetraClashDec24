@@ -13,6 +13,8 @@ namespace TetraClashDec24
 
         private GameState _currentState;
 
+        private Texture2D _background;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -44,6 +46,7 @@ namespace TetraClashDec24
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            _background = Content.Load<Texture2D>(@"background");
             _currentState.LoadContent();
         }
 
@@ -63,6 +66,9 @@ namespace TetraClashDec24
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
+            spriteBatch.Begin();
+            spriteBatch.Draw(_background, new Rectangle(0, 0, 1920, 1080), Color.White);
+            spriteBatch.End();
             _currentState.Draw(gameTime);
             base.Draw(gameTime);
         }
