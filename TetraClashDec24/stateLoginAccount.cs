@@ -11,10 +11,11 @@ public class LoginState : GameState
 {
 
     private InputButton usernameBox;
-
     private string UBDefaultString = "Enter Username";
     private InputButton passwordBox;
     private string PBDefaultString = "Enter Password";
+
+    private string ErrorString = "";
 
     private Button submitButton;
     private Button createAccountButton;
@@ -36,14 +37,15 @@ public class LoginState : GameState
     private enum InputField { None, Username, Password }
     private InputField focusedField = InputField.None;
 
-    public LoginState(Game1 game, ButtonState clickState) : base(game)
+    public LoginState(Game1 game, ButtonState clickState, string cache_username) : base(game)
     {
         prevClickState = clickState;
+        username = cache_username;
     }
 
     public override void LoadContent()
     {
-        usernameBox = new InputButton(inputTexturePath, 380, 490, 200, 100, Color.White, UBDefaultString);
+        usernameBox = new InputButton(inputTexturePath, 380, 490, 200, 100, Color.White, username);
         usernameBox.LoadContent(Game.Content);
 
         passwordBox = new InputButton(inputTexturePath, 1340, 490, 200, 100, Color.White, PBDefaultString);
@@ -51,6 +53,8 @@ public class LoginState : GameState
 
         submitButton = new Button(inputTexturePath, 860, 760, 200, 100, Color.White, "Submit!");
         submitButton.LoadContent(Game.Content);
+
+        font = Game.Content.Load<SpriteFont>(@"myFont");
     }
 
 
@@ -73,11 +77,36 @@ public class LoginState : GameState
             }
             else if (submitButton.Box.Contains(mousePosition))
             {
-                string salt = Security.GenerateSalt();
-                string hash = Security.GenerateHash(password, salt);
-                string message = $"login{username}:{hash}:{salt}";
-                Client.sendMessage(message);
-                Game.ChangeState(new MainMenuState(Game, mouse.LeftButton));
+                string salt = Client.sendMessage($"salt{username}");
+                if (salt == "Username")
+                {
+                    ErrorString = "Error: Username could not be found.";
+                    username = ""; 
+                    password = "";
+                }
+                else if (salt.Contains(" "))
+                {
+                    ErrorString = $"Unknown error: {salt}";
+                }
+                else
+                {
+                    string hash = Security.GenerateHash(password, salt);
+                    string message = $"login{username}:{hash}";
+                    string response = Client.sendMessage(message);
+                    if (response == "Success")
+                    {
+                        Game.ChangeState(new MainMenuState(Game, mouse.LeftButton));
+                    }
+                    else if (response == "Password")
+                    {
+                        ErrorString = "Error: Password is incorrect, please retry.";
+                        password = "";
+                    }
+                    else
+                    {
+                        ErrorString = $"Unknown error: {response}";
+                    }
+                }
             }
             else
             {
@@ -110,7 +139,7 @@ public class LoginState : GameState
             passwordBox.highlighted = false;
             if (password == "")
             {
-                passwordBox.Text = UBDefaultString;
+                passwordBox.Text = PBDefaultString;
             }
         }
         prevClickState = mouse.LeftButton;
@@ -124,6 +153,13 @@ public class LoginState : GameState
         usernameBox.Draw(spriteBatch);
         passwordBox.Draw(spriteBatch);
         submitButton.Draw(spriteBatch);
+        if (ErrorString != "")
+        {
+            Vector2 textSize = font.MeasureString(ErrorString);
+            float textX = 700 - (textSize.X / 2);
+            float textY = 700 - (textSize.Y / 2);
+            spriteBatch.DrawString(font, ErrorString, new Vector2(textX, textY), Color.Red);
+        }
         spriteBatch.End();
     }
 

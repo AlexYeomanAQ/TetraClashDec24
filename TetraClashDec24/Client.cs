@@ -14,17 +14,15 @@ namespace TetraClashDec24
         {
             try
             {
-                TcpClient client = new TcpClient("127.0.0.1", 12345);
+                TcpClient client = new TcpClient("localhost", 12345);
                 Console.WriteLine("Connected to server.");
 
                 NetworkStream stream = client.GetStream();
                 byte[] buffer = Encoding.UTF8.GetBytes(message);
 
-                // Send the message to the server
                 stream.Write(buffer, 0, buffer.Length);
                 Console.WriteLine($"Sent: {message}");
 
-                // Optionally, read the server's response
                 byte[] responseBuffer = new byte[1024];
                 int bytesRead = stream.Read(responseBuffer, 0, responseBuffer.Length);
                 string response = Encoding.UTF8.GetString(responseBuffer, 0, bytesRead);

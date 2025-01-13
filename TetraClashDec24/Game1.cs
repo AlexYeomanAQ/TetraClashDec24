@@ -26,17 +26,16 @@ namespace TetraClashDec24
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
             string cachePath = "cache.txt";
             MouseState mouse = Mouse.GetState();
 
             if (File.Exists(cachePath))
             {
-                _currentState = new LoginState(this, mouse.LeftButton);
+                string username = File.ReadAllText(cachePath);
+                _currentState = new LoginState(this, mouse.LeftButton, username);
             }
             else
             {
-                File.WriteAllText("cache.txt", "");
                 _currentState = new CreateAccountState(this, mouse.LeftButton);
             }
             base.Initialize();
@@ -46,8 +45,6 @@ namespace TetraClashDec24
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
             _currentState.LoadContent();
-
-            // TODO: use this.Content to load your game content here
         }
 
         protected override void Update(GameTime gameTime)

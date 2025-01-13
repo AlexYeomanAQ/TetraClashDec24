@@ -6,22 +6,24 @@ using System.Linq;
 using System;
 using System.Net.Cache;
 using System.Net.Security;
+using SharpDX.Direct3D9;
+using static System.Net.Mime.MediaTypeNames;
+using System.IO;
 
 public class CreateAccountState : GameState
 {
 
     private InputButton usernameBox;
-
     private string UBDefaultString = "Enter Username";
     private InputButton passwordBox;
     private string PBDefaultString = "Enter Password";
 
-    private Button submitButton;
-    private Button loginButton;          
+    private string ErrorString = "";
+
+    private Button submitButton;       
 
     private string username = "";
     private string password = "";
-
 
     private SpriteFont font;
     private string inputTexturePath = @"base";
@@ -51,6 +53,8 @@ public class CreateAccountState : GameState
 
         submitButton = new Button(inputTexturePath, 860, 760, 200, 100, Color.White, "Submit!");
         submitButton.LoadContent(Game.Content);
+
+        font = Game.Content.Load<SpriteFont>(@"myFont");
     }
 
 
@@ -76,8 +80,24 @@ public class CreateAccountState : GameState
                 string salt = Security.GenerateSalt();
                 string hash = Security.GenerateHash(password, salt);
                 string message = $"create{username}:{hash}:{salt}";
-                Client.sendMessage(message);
-                Game.ChangeState(new MainMenuState(Game, mouse.LeftButton));
+                string response = Client.sendMessage(message);
+
+                if (response == "Success")
+                {
+                    using (StreamWriter writer = new StreamWriter("cache.txt"))
+                    {
+                        writer.Write(username);
+                    }
+                    Game.ChangeState(new MainMenuState(Game, mouse.LeftButton));
+                }
+                else if (response == "Player Exists")
+                {
+                    ErrorString = "Username already exists, please select a new one or log in.";
+                }
+                else
+                {
+                    ErrorString = $"Unknown Error: {response}";
+                }
             }
             else
             {
@@ -124,6 +144,13 @@ public class CreateAccountState : GameState
         usernameBox.Draw(spriteBatch);
         passwordBox.Draw(spriteBatch);
         submitButton.Draw(spriteBatch);
+        if (ErrorString != "")
+        {
+            Vector2 textSize = font.MeasureString(ErrorString);
+            float textX = 700 - (textSize.X / 2);
+            float textY = 700 - (textSize.Y / 2);
+            spriteBatch.DrawString(font, ErrorString, new Vector2(textX, textY), Color.Red);
+        }
         spriteBatch.End();
     }
 
