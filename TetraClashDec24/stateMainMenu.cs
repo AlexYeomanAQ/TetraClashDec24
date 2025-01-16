@@ -15,7 +15,7 @@ public class MainMenuState : GameState
 
     public override void LoadContent()
     {
-        PlayButton = new Button(@"base", 500, 500, 300, 300, Color.White, "Play");
+        PlayButton = new Button(@"base", 880, 340, 200, 200, Color.White, "Play");
         PlayButton.LoadContent(Game.Content);
     }
 
