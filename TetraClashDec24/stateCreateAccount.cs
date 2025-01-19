@@ -131,7 +131,7 @@ public class CreateAccountState : GameState
             passwordBox.highlighted = false;
             if (password == "")
             {
-                passwordBox.Text = UBDefaultString;
+                passwordBox.Text = PBDefaultString;
             }
         }
         prevClickState = mouse.LeftButton;
