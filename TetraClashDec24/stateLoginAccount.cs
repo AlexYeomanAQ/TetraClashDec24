@@ -95,6 +95,7 @@ public class LoginState : GameState
                     string response = Client.sendMessage(message);
                     if (response == "Success")
                     {
+                        Game.Username = username;
                         Game.ChangeState(new MainMenuState(Game, mouse.LeftButton));
                     }
                     else if (response == "Password")

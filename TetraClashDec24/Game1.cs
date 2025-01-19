@@ -15,6 +15,7 @@ namespace TetraClashDec24
 
         private Texture2D _background;
 
+        public string Username;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);

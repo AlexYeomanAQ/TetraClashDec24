@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace TetraClashDec24
 {
-    class Client
+    public static class Client
     {
         public static string sendMessage(string message)
         {

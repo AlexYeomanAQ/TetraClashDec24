@@ -88,6 +88,7 @@ public class CreateAccountState : GameState
                     {
                         writer.Write(username);
                     }
+                    Game.Username = username;
                     Game.ChangeState(new MainMenuState(Game, mouse.LeftButton));
                 }
                 else if (response == "Player Exists")
