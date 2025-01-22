@@ -1,31 +1,21 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace TetraClashDec24
 {
-    public class displayCogs
+    public static class displayCogs
     {
-        int defaultWidth = 1920;
-        int defaultHeight = 1080;
-
-        GraphicsDevice _graphicsDevice;
-        public displayCogs(GraphicsDevice graphicsDevice)
+        public static Vector2 centreTextPos(SpriteFont font, string text, int x, int y)
         {
-            _graphicsDevice = graphicsDevice;
-        }
-
-        public Vector2 vectorPosCalculation(Vector2 vector)
-        {
-            int currentWidth = _graphicsDevice.Viewport.Width;
-            int currentHeight = _graphicsDevice.Viewport.Width;
-            float sf_X = currentWidth / defaultWidth;
-            float sf_Y = currentHeight / defaultHeight;
-            return new Vector2((int)vector.X * sf_X, (int)vector.Y * sf_Y);
+            Vector2 textSize = font.MeasureString(text);
+            float textX = x - (textSize.X / 2);
+            float textY = y - (textSize.Y / 2);
+            return new Vector2((int)textX, (int)textY);
         }
 
     }

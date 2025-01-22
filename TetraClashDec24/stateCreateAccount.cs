@@ -9,24 +9,29 @@ using System.Net.Security;
 using SharpDX.Direct3D9;
 using static System.Net.Mime.MediaTypeNames;
 using System.IO;
+using SharpDX.Direct2D1.Effects;
 
 public class CreateAccountState : GameState
 {
 
     private InputButton usernameBox;
-    private string UBDefaultString = "Enter Username";
     private InputButton passwordBox;
-    private string PBDefaultString = "Enter Password";
+
+    private Button submitButton;
+
+    private Texture2D titleTexture;
+
+    private SpriteFont font;
+    private SpriteFont titleFont;
 
     private string ErrorString = "";
-
-    private Button submitButton;       
+    private string UBDefaultString = "Enter Username";
+    private string PBDefaultString = "Enter Password";
 
     private string username = "";
     private string password = "";
 
-    private SpriteFont font;
-    private string inputTexturePath = @"base";
+    private string basePath = @"base";
 
     private KeyboardState keyboard;
     private MouseState mouse;
@@ -45,16 +50,19 @@ public class CreateAccountState : GameState
 
     public override void LoadContent()
     {
-        usernameBox = new InputButton(inputTexturePath, 380, 490, 200, 100, Color.White, UBDefaultString);
+        usernameBox = new InputButton(basePath, 835, 600, 250, 50, Color.White, UBDefaultString);
         usernameBox.LoadContent(Game.Content);
 
-        passwordBox = new InputButton(inputTexturePath, 1340, 490, 200, 100, Color.White, PBDefaultString);
+        passwordBox = new InputButton(basePath, 835, 700, 250, 50, Color.White, PBDefaultString);
         passwordBox.LoadContent(Game.Content);
 
-        submitButton = new Button(inputTexturePath, 860, 760, 200, 100, Color.White, "Submit!");
+        submitButton = new Button(basePath, 885, 800, 150, 100, Color.White, "Submit!");
         submitButton.LoadContent(Game.Content);
 
+        titleTexture = Game.Content.Load<Texture2D>(@"tempLogo");
+
         font = Game.Content.Load<SpriteFont>(@"myFont");
+        titleFont = Game.Content.Load<SpriteFont>(@"titleFont");
     }
 
 
@@ -141,16 +149,21 @@ public class CreateAccountState : GameState
     {
         SpriteBatch spriteBatch = new SpriteBatch(Game.GraphicsDevice);
         spriteBatch.Begin();
+
+        spriteBatch.DrawString(titleFont, "Create an Account", displayCogs.centreTextPos(titleFont, "Create an Account", 960, 500), Color.White);
+
+        spriteBatch.Draw(titleTexture, new Rectangle(760, 100, 400, 400), Color.White);
+
         usernameBox.Draw(spriteBatch);
         passwordBox.Draw(spriteBatch);
         submitButton.Draw(spriteBatch);
+
         if (ErrorString != "")
         {
-            Vector2 textSize = font.MeasureString(ErrorString);
-            float textX = 700 - (textSize.X / 2);
-            float textY = 700 - (textSize.Y / 2);
-            spriteBatch.DrawString(font, ErrorString, new Vector2(textX, textY), Color.Red);
+            Vector2 textPos = displayCogs.centreTextPos(font, ErrorString, 960, 540);
+            spriteBatch.DrawString(font, ErrorString, textPos, Color.Red);
         }
+
         spriteBatch.End();
     }
 

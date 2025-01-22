@@ -7,9 +7,9 @@ namespace TetraClashDec24
 {
     class GameObject
     {
-        public Vector2 Location;
-        protected Texture2D Texture;
-        public SpriteFont GameFont;
+        public Vector2 startLocation;
+        protected Texture2D baseTexture;
+        public SpriteFont baseFont;
         public virtual void LoadContent(ContentManager Content)
         {
         }
@@ -21,7 +21,6 @@ namespace TetraClashDec24
 
         public virtual void Draw(SpriteBatch SpriteBatch)
         {
-            SpriteBatch.Draw(Texture, Location, Color.White);
         }
     }
 }
