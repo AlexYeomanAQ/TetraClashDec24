@@ -3,10 +3,10 @@ using Microsoft.Xna.Framework;
 using TetraClashDec24;
 using Microsoft.Xna.Framework.Graphics;
 
-public class Template : GameState
+public class Template : AppState
 {
     Button TestButton;
-    public Template(Game1 game) : base(game)
+    public Template(App1 game) : base(game)
     {
 
     }

@@ -10,7 +10,7 @@ using System;
 
 namespace TetraClashDec24
 {
-    class SearchState : GameState
+    class SearchState : AppState
     {
         private SpriteFont SearchFont;
         private Button CancelButton;
@@ -20,7 +20,7 @@ namespace TetraClashDec24
         private int matchID;
 
         private ButtonState prevClickState;
-        public SearchState(Game1 game, ButtonState clickState) : base(game)
+        public SearchState(App1 game, ButtonState clickState) : base(game)
         {
             prevClickState = clickState;
             isFound = false;

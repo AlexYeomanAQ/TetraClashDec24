@@ -7,7 +7,7 @@ using System;
 using System.Net.Cache;
 using System.Net.Security;
 
-public class LoginState : GameState
+public class LoginState : AppState
 {
 
     private InputButton usernameBox;
@@ -37,7 +37,7 @@ public class LoginState : GameState
     private enum InputField { None, Username, Password }
     private InputField focusedField = InputField.None;
 
-    public LoginState(Game1 game, ButtonState clickState, string cache_username) : base(game)
+    public LoginState(App1 game, ButtonState clickState, string cache_username) : base(game)
     {
         prevClickState = clickState;
         username = cache_username;

@@ -6,17 +6,17 @@ using System.IO;
 
 namespace TetraClashDec24
 {
-    public class Game1 : Game
+    public class App1 : Game
     {
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
-        private GameState _currentState;
+        private AppState _currentState;
 
         private Texture2D _background;
 
         public string Username;
-        public Game1()
+        public App1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
@@ -35,8 +35,7 @@ namespace TetraClashDec24
             if (File.Exists(cachePath))
             {
                 string username = File.ReadAllText(cachePath);
-                //_currentState = new LoginState(this, mouse.LeftButton, username);
-                _currentState = new CreateAccountState(this, mouse.LeftButton);
+                _currentState = new LoginState(this, mouse.LeftButton, username);
             }
             else
             {
@@ -75,7 +74,7 @@ namespace TetraClashDec24
             base.Draw(gameTime);
         }
 
-        public void ChangeState(GameState newState)
+        public void ChangeState(AppState newState)
         {
             _currentState = newState;
             _currentState.LoadContent();

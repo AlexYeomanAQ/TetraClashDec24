@@ -7,7 +7,7 @@ using System;
 
 namespace TetraClashDec24
 {
-    class Button : GameObject
+    class Button : AppObject
     {
         public Rectangle Box;
         public string TexturePath;
@@ -24,8 +24,8 @@ namespace TetraClashDec24
 
         public override void LoadContent(ContentManager Content)
         {
-            baseTexture = Content.Load<Texture2D>(@"base");
-            baseFont = Content.Load<SpriteFont>(@"myFont");
+            Texture = Content.Load<Texture2D>(@"base");
+            GameFont = Content.Load<SpriteFont>(@"myFont");
         }
 
         public override void Update(GameTime gameTime)
@@ -34,12 +34,14 @@ namespace TetraClashDec24
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(baseTexture, Box, Colour);
+            spriteBatch.Draw(Texture, Box, Colour);
 
             if (Text != "")
             {
-                Vector2 textPos = displayCogs.centreTextPos(baseFont, Text, Box.X + (Box.Width / 2), Box.Y + (Box.Height / 2));
-                spriteBatch.DrawString(baseFont, Text, textPos, Color.Black);
+                Vector2 textSize = GameFont.MeasureString(Text);
+                float textX = Box.X + (Box.Width / 2) - (textSize.X / 2);
+                float textY = Box.Y + (Box.Height / 2) - (textSize.Y / 2);
+                spriteBatch.DrawString(GameFont, Text, new Vector2(textX, textY), Color.Black);
             }
         }
     }
@@ -58,8 +60,8 @@ namespace TetraClashDec24
 
         public override void LoadContent(ContentManager Content)
         {
-            baseTexture = Content.Load<Texture2D>(TexturePath);
-            baseFont = Content.Load<SpriteFont>(@"myFont");
+            Texture = Content.Load<Texture2D>(TexturePath);
+            GameFont = Content.Load<SpriteFont>(@"myFont");
         }
 
         public override void Update(GameTime gameTime)
@@ -69,14 +71,16 @@ namespace TetraClashDec24
         public override void Draw(SpriteBatch spriteBatch)
         {
             if (highlighted)
-                spriteBatch.Draw(baseTexture, Box, Color.LightBlue);
+                spriteBatch.Draw(Texture, Box, Color.LightBlue);
             else
-                spriteBatch.Draw(baseTexture, Box, Color.White);
+                spriteBatch.Draw(Texture, Box, Color.White);
 
             if (Text != "")
             {
-                Vector2 textPos = displayCogs.centreTextPos(baseFont, Text, Box.X + (Box.Width / 2), Box.Y + (Box.Height / 2));
-                spriteBatch.DrawString(baseFont, Text, textPos, Color.Black);
+                Vector2 textSize = GameFont.MeasureString(Text);
+                float textX = Box.X + (Box.Width / 2) - (textSize.X / 2);
+                float textY = Box.Y + (Box.Height / 2) - (textSize.Y / 2);
+                spriteBatch.DrawString(GameFont, Text, new Vector2(textX, textY), Color.Black);
             }
         }
     }

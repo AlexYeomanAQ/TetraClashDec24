@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace TetraClashDec24
 {
-    public abstract class GameState
+    public abstract class AppState
     {
-        protected Game1 Game;
+        protected App1 Game;
 
-        public GameState(Game1 game)
+        public AppState(App1 game)
         {
             Game = game;
         }

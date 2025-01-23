@@ -11,7 +11,7 @@ using static System.Net.Mime.MediaTypeNames;
 using System.IO;
 using SharpDX.Direct2D1.Effects;
 
-public class CreateAccountState : GameState
+public class CreateAccountState : AppState
 {
 
     private InputButton usernameBox;
@@ -43,7 +43,7 @@ public class CreateAccountState : GameState
     private enum InputField {None, Username, Password}
     private InputField focusedField = InputField.None; 
 
-    public CreateAccountState(Game1 game, ButtonState clickState) : base(game)
+    public CreateAccountState(App1 game, ButtonState clickState) : base(game)
     {
         prevClickState = clickState;
     }
@@ -150,9 +150,9 @@ public class CreateAccountState : GameState
         SpriteBatch spriteBatch = new SpriteBatch(Game.GraphicsDevice);
         spriteBatch.Begin();
 
-        spriteBatch.DrawString(titleFont, "Create an Account", displayCogs.centreTextPos(titleFont, "Create an Account", 960, 500), Color.White);
+        spriteBatch.DrawString(titleFont, "Create an Account", displayCogs.centreTextPos(titleFont, "Create an Account", 960, 475), Color.White);
 
-        spriteBatch.Draw(titleTexture, new Rectangle(760, 100, 400, 400), Color.White);
+        spriteBatch.Draw(titleTexture, new Rectangle(760, 0, 400, 400), Color.White);
 
         usernameBox.Draw(spriteBatch);
         passwordBox.Draw(spriteBatch);
@@ -160,7 +160,7 @@ public class CreateAccountState : GameState
 
         if (ErrorString != "")
         {
-            Vector2 textPos = displayCogs.centreTextPos(font, ErrorString, 960, 540);
+            Vector2 textPos = displayCogs.centreTextPos(font, ErrorString, 960, 1000);
             spriteBatch.DrawString(font, ErrorString, textPos, Color.Red);
         }
 

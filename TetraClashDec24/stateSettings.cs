@@ -3,12 +3,12 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TetraClashDec24;
 
-public class SettingsState : GameState
+public class SettingsState : AppState
 {
     Button TestButton;
 
     private ButtonState prevClickState;
-    public SettingsState(Game1 game, ButtonState clickState) : base(game)
+    public SettingsState(App1 game, ButtonState clickState) : base(game)
     {
         prevClickState = clickState;
     }

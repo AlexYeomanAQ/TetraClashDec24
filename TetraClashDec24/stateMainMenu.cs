@@ -3,12 +3,12 @@ using Microsoft.Xna.Framework;
 using TetraClashDec24;
 using Microsoft.Xna.Framework.Graphics;
 
-public class MainMenuState : GameState
+public class MainMenuState : AppState
 {
     Button PlayButton;
 
     private ButtonState prevClickState;
-    public MainMenuState(Game1 game, ButtonState clickState) : base(game)
+    public MainMenuState(App1 game, ButtonState clickState) : base(game)
     {
         prevClickState = clickState;
     }
