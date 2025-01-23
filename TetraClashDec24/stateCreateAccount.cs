@@ -43,7 +43,7 @@ public class CreateAccountState : AppState
     private enum InputField {None, Username, Password}
     private InputField focusedField = InputField.None; 
 
-    public CreateAccountState(App1 game, ButtonState clickState) : base(game)
+    public CreateAccountState(App1 app, ButtonState clickState) : base(app)
     {
         prevClickState = clickState;
     }
@@ -51,18 +51,18 @@ public class CreateAccountState : AppState
     public override void LoadContent()
     {
         usernameBox = new InputButton(basePath, 835, 600, 250, 50, Color.White, UBDefaultString);
-        usernameBox.LoadContent(Game.Content);
+        usernameBox.LoadContent(App.Content);
 
         passwordBox = new InputButton(basePath, 835, 700, 250, 50, Color.White, PBDefaultString);
-        passwordBox.LoadContent(Game.Content);
+        passwordBox.LoadContent(App.Content);
 
         submitButton = new Button(basePath, 885, 800, 150, 100, Color.White, "Submit!");
-        submitButton.LoadContent(Game.Content);
+        submitButton.LoadContent(App.Content);
 
-        titleTexture = Game.Content.Load<Texture2D>(@"tempLogo");
+        titleTexture = App.Content.Load<Texture2D>(@"tempLogo");
 
-        font = Game.Content.Load<SpriteFont>(@"myFont");
-        titleFont = Game.Content.Load<SpriteFont>(@"titleFont");
+        font = App.Content.Load<SpriteFont>(@"myFont");
+        titleFont = App.Content.Load<SpriteFont>(@"titleFont");
     }
 
 
@@ -96,8 +96,8 @@ public class CreateAccountState : AppState
                     {
                         writer.Write(username);
                     }
-                    Game.Username = username;
-                    Game.ChangeState(new MainMenuState(Game, mouse.LeftButton));
+                    App.Username = username;
+                    App.ChangeState(new MainMenuState(App, mouse.LeftButton));
                 }
                 else if (response == "Player Exists")
                 {
@@ -150,7 +150,7 @@ public class CreateAccountState : AppState
         SpriteBatch spriteBatch = new SpriteBatch(Game.GraphicsDevice);
         spriteBatch.Begin();
 
-        spriteBatch.DrawString(titleFont, "Create an Account", displayCogs.centreTextPos(titleFont, "Create an Account", 960, 475), Color.White);
+        spriteBatch.DrawString(titleFont, "Create an Account", Cogs.centreTextPos(titleFont, "Create an Account", 960, 475), Color.White);
 
         spriteBatch.Draw(titleTexture, new Rectangle(760, 0, 400, 400), Color.White);
 
@@ -160,7 +160,7 @@ public class CreateAccountState : AppState
 
         if (ErrorString != "")
         {
-            Vector2 textPos = displayCogs.centreTextPos(font, ErrorString, 960, 1000);
+            Vector2 textPos = Cogs.centreTextPos(font, ErrorString, 960, 1000);
             spriteBatch.DrawString(font, ErrorString, textPos, Color.Red);
         }
 

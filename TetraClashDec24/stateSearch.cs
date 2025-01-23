@@ -20,7 +20,7 @@ namespace TetraClashDec24
         private int matchID;
 
         private ButtonState prevClickState;
-        public SearchState(App1 game, ButtonState clickState) : base(game)
+        public SearchState(App1 app, ButtonState clickState) : base(app)
         {
             prevClickState = clickState;
             isFound = false;
@@ -30,16 +30,16 @@ namespace TetraClashDec24
         public override void LoadContent()
         {
             CancelButton = new Button(@"base", 860, 710, 200, 100, Color.White, "Cancel");
-            CancelButton.LoadContent(Game.Content);
+            CancelButton.LoadContent(App.Content);
 
-            SearchFont = Game.Content.Load<SpriteFont>(@"myFont");
+            SearchFont = App.Content.Load<SpriteFont>(@"myFont");
         }
 
         public override void Update(GameTime gameTime)
         {
             if (isFound)
             {
-                Game.ChangeState(new MainGameState(Game, prevClickState));
+                App.ChangeState(new MainGameState(App, prevClickState));
             }
 
             MouseState mouse = Mouse.GetState();
@@ -57,7 +57,7 @@ namespace TetraClashDec24
 
         public override void Draw(GameTime gameTime)
         {
-            SpriteBatch spriteBatch = new SpriteBatch(Game.GraphicsDevice);
+            SpriteBatch spriteBatch = new SpriteBatch(App.GraphicsDevice);
             spriteBatch.Begin();
             Vector2 textSize = SearchFont.MeasureString(searchMessage);
             float textX = (1920 / 2) - (textSize.X / 2);

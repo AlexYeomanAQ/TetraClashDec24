@@ -32,11 +32,12 @@ namespace TetraClashDec24
         {
             List<int> lines = new List<int>();
             int row = fieldHeight - 1;
-            for (int y = row; y >= 0; y--) //Using Y and X for appropriate collumn names
+            for (int y = fieldHeight - 1; y >= 0; y--) //Using Y and X for appropriate collumn names
             {
                 for (int x = 0; x < fieldWidth; x++)
                 {
-                    fieldArray[row, x]
+                    fieldArray[row, x] = fieldArray[y, x];
+
                 }
 
             }

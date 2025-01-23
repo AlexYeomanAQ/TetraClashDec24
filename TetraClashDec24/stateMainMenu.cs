@@ -16,7 +16,7 @@ public class MainMenuState : AppState
     public override void LoadContent()
     {
         PlayButton = new Button(@"base", 880, 340, 200, 200, Color.White, "Play");
-        PlayButton.LoadContent(Game.Content);
+        PlayButton.LoadContent(App.Content);
     }
 
     public override void Update(GameTime gameTime)
@@ -28,7 +28,7 @@ public class MainMenuState : AppState
             Point mousePosition = new Point(mouse.X, mouse.Y);
             if (PlayButton.Box.Contains(mousePosition))
             {
-                Game.ChangeState(new SearchState(Game, mouse.LeftButton));
+                App.ChangeState(new SearchState(App, mouse.LeftButton));
             }
         }
         prevClickState = mouse.LeftButton;

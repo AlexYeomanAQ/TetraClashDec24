@@ -9,11 +9,11 @@ namespace TetraClashDec24
 {
     public abstract class AppState
     {
-        protected App1 Game;
+        protected App1 App;
 
-        public AppState(App1 game)
+        public AppState(App1 app)
         {
-            Game = game;
+            App = app;
         }
 
         public abstract void LoadContent();

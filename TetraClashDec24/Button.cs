@@ -22,10 +22,11 @@ namespace TetraClashDec24
             Text = text;
         }
 
+
         public override void LoadContent(ContentManager Content)
         {
-            Texture = Content.Load<Texture2D>(@"base");
-            GameFont = Content.Load<SpriteFont>(@"myFont");
+            baseTexture = Content.Load<Texture2D>(@"base");
+            baseFont = Content.Load<SpriteFont>(@"myFont");
         }
 
         public override void Update(GameTime gameTime)
@@ -34,14 +35,14 @@ namespace TetraClashDec24
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(Texture, Box, Colour);
+            spriteBatch.Draw(baseTexture, Box, Colour);
 
             if (Text != "")
             {
-                Vector2 textSize = GameFont.MeasureString(Text);
+                Vector2 textSize = baseFont.MeasureString(Text);
                 float textX = Box.X + (Box.Width / 2) - (textSize.X / 2);
                 float textY = Box.Y + (Box.Height / 2) - (textSize.Y / 2);
-                spriteBatch.DrawString(GameFont, Text, new Vector2(textX, textY), Color.Black);
+                spriteBatch.DrawString(baseFont, Text, new Vector2(textX, textY), Color.Black);
             }
         }
     }
@@ -60,8 +61,8 @@ namespace TetraClashDec24
 
         public override void LoadContent(ContentManager Content)
         {
-            Texture = Content.Load<Texture2D>(TexturePath);
-            GameFont = Content.Load<SpriteFont>(@"myFont");
+            baseTexture = Content.Load<Texture2D>(TexturePath);
+            baseFont = Content.Load<SpriteFont>(@"myFont");
         }
 
         public override void Update(GameTime gameTime)
@@ -71,16 +72,16 @@ namespace TetraClashDec24
         public override void Draw(SpriteBatch spriteBatch)
         {
             if (highlighted)
-                spriteBatch.Draw(Texture, Box, Color.LightBlue);
+                spriteBatch.Draw(baseTexture, Box, Color.LightBlue);
             else
-                spriteBatch.Draw(Texture, Box, Color.White);
+                spriteBatch.Draw(baseTexture, Box, Color.White);
 
             if (Text != "")
             {
-                Vector2 textSize = GameFont.MeasureString(Text);
+                Vector2 textSize = baseFont.MeasureString(Text);
                 float textX = Box.X + (Box.Width / 2) - (textSize.X / 2);
                 float textY = Box.Y + (Box.Height / 2) - (textSize.Y / 2);
-                spriteBatch.DrawString(GameFont, Text, new Vector2(textX, textY), Color.Black);
+                spriteBatch.DrawString(baseFont, Text, new Vector2(textX, textY), Color.Black);
             }
         }
     }
