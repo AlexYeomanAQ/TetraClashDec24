@@ -38,6 +38,10 @@ namespace TetraClashDec24
                 {
                     fieldArray[row, x] = fieldArray[y, x];
 
+                    if (fieldArray[y, x] != 0)
+                    {
+                        fieldArray[row, x] = 
+                    }
                 }
 
             }
