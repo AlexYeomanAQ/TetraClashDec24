@@ -35,11 +35,11 @@ namespace TetraClashDec24
             if (File.Exists(cachePath))
             {
                 string username = File.ReadAllText(cachePath);
-                _currentState = new LoginState(this, mouse.LeftButton, username);
+                _currentState = new MainGameState(this, mouse.LeftButton);
             }
             else
             {
-                _currentState = new CreateAccountState(this, mouse.LeftButton);
+                _currentState = new MainGameState(this, mouse.LeftButton);
             }
             base.Initialize();
         }
