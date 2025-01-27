@@ -27,6 +27,5 @@ namespace TetraClashDec24
             float textY = y - (textSize.Y / 2);
             return new Vector2((int)textX, (int)textY);
         }
-
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
-using TetraClashDec24;
 using Microsoft.Xna.Framework.Graphics;
 using System.Net.Sockets;
 using System.Text;
@@ -20,7 +19,7 @@ namespace TetraClashDec24
         private int matchID;
 
         private ButtonState prevClickState;
-        public SearchState(App1 app, ButtonState clickState) : base(app)
+        public SearchState(App app, ButtonState clickState) : base(app)
         {
             prevClickState = clickState;
             isFound = false;
@@ -49,7 +48,7 @@ namespace TetraClashDec24
                 Point mousePosition = new Point(mouse.X, mouse.Y);
                 if (CancelButton.Box.Contains(mousePosition))
                 {
-                    
+                    //Add request to cancel
                 }
             }
             prevClickState = mouse.LeftButton;
@@ -60,8 +59,8 @@ namespace TetraClashDec24
             SpriteBatch spriteBatch = new SpriteBatch(App.GraphicsDevice);
             spriteBatch.Begin();
             Vector2 textSize = SearchFont.MeasureString(searchMessage);
-            float textX = (1920 / 2) - (textSize.X / 2);
-            float textY = (1080 / 2) - (textSize.Y / 2);
+            float textX = 1920 / 2 - textSize.X / 2;
+            float textY = 1080 / 2 - textSize.Y / 2;
             spriteBatch.DrawString(SearchFont, searchMessage, new Vector2(textX, textY), Color.Black);
             CancelButton.Draw(spriteBatch);
             spriteBatch.End();
@@ -72,7 +71,7 @@ namespace TetraClashDec24
             searchMessage = "Searching...";
             try
             {
-                string response = await Task.Run(() => Client.sendMessage($"search:{Game.Username}"));
+                string response = await Task.Run(() => Client.sendMessage($"search:{App.Username}"));
 
                 if (response.StartsWith("found:"))
                 {

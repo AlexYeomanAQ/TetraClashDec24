@@ -6,7 +6,7 @@ using System.IO;
 
 namespace TetraClashDec24
 {
-    public class App1 : Game
+    public class App : Game
     {
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
@@ -16,7 +16,7 @@ namespace TetraClashDec24
         private Texture2D _background;
 
         public string Username;
-        public App1()
+        public App()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";

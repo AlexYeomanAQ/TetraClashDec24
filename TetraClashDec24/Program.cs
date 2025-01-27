@@ -1,3 +1,3 @@
 ﻿
-using var game = new TetraClashDec24.App1();
+using var game = new TetraClashDec24.App();
 game.Run();

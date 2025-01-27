@@ -1,17 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TetraClashDec24
 {
     public abstract class AppState
     {
-        protected App1 App;
+        protected App App;
 
-        public AppState(App1 app)
+        public AppState(App app)
         {
             App = app;
         }
