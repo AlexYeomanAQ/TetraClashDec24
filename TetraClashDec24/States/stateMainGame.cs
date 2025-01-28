@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Threading;
 
 namespace TetraClashDec24
 {
@@ -14,6 +15,10 @@ namespace TetraClashDec24
         private int gridX;
         private int gridY;
 
+        private int dropTimer;
+        private int dropRate;
+        private bool fastDrop;
+
         private GameState gameState;
 
         private KeyboardState keyboard;
@@ -25,11 +30,16 @@ namespace TetraClashDec24
         public MainGameState(App app, ButtonState clickState) : base(app)
         {
             prevClickState = clickState;
+
             blockTextures = new Texture2D[7];
             gameState = new GameState();
+
             tileSize = 25;
             gridX = 1920 / 2 - (gameState.GameGrid.Collumns * tileSize / 2);
             gridY = 1080 / 2 - ((gameState.GameGrid.Rows - 2) * tileSize / 2);
+
+            dropTimer = 0;
+            dropRate = 500;
         }
 
         public override void LoadContent()
@@ -50,10 +60,21 @@ namespace TetraClashDec24
 
             Keys[] pressedKeys = keyboard.GetPressedKeys();
 
+            bool fastSwitch = false;
+
             foreach (Keys key in pressedKeys)
             {
+                if (key == Keys.Down)
+                {
+                    fastSwitch = true;
+                }
+                else if (key != Keys.Down && !fastSwitch)
+                {
+                    fastSwitch = false;
+                }
                 if (prevKeyboardState.IsKeyUp(key))
                 {
+                    Console.WriteLine("test");
                     if (key == Keys.Left)
                     {
                         gameState.MoveBlockLeft();
@@ -62,9 +83,9 @@ namespace TetraClashDec24
                     {
                         gameState.MoveBlockRight();
                     }
-                    else if (key == Keys.Down)
+                    else if (key == Keys.Up)
                     {
-                        gameState.MoveBlockDown();
+                        gameState.HardDrop();
                     }
                     else if (key == Keys.Z)
                     {
@@ -74,6 +95,27 @@ namespace TetraClashDec24
                     {
                         gameState.RotateBlockCW();
                     }
+
+                }
+            }
+            fastDrop = fastSwitch;
+
+            dropTimer += gameTime.ElapsedGameTime.Milliseconds;
+
+            if (fastDrop)
+            {
+                if (dropTimer >= dropRate/10)
+                {
+                    dropTimer = 0;
+                    gameState.MoveBlockDown();
+                }
+            }
+            else
+            {
+                if (dropTimer >= dropRate)
+                {
+                    dropTimer = 0;
+                    gameState.MoveBlockDown();
                 }
             }
         }

@@ -1,4 +1,6 @@
-﻿namespace TetraClashDec24
+﻿using System;
+
+namespace TetraClashDec24
 {
     public class GameState
     {
@@ -21,7 +23,7 @@
         public GameState()
         {
             GameGrid = new GameGrid(22, 10);
-            BlockQueue = new BlockQueue();
+            BlockQueue = new BlockQueue(1234);
             CurrentBlock = BlockQueue.GetAndUpdate();
         }
 
@@ -102,7 +104,7 @@
             }
         }
 
-        public void MoveBlockDown()
+        public bool MoveBlockDown()
         {
             CurrentBlock.Move(1, 0);
 
@@ -110,6 +112,20 @@
             {
                 CurrentBlock.Move(-1, 0);
                 PlaceBlock();
+                return true;
+            }
+
+            return false;
+        }
+
+        public void HardDrop()
+        {
+            while (true)
+            {
+                if(MoveBlockDown())
+                {
+                    return;
+                }
             }
         }
     }

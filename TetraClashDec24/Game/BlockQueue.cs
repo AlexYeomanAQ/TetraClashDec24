@@ -19,14 +19,14 @@ namespace TetraClashDec24
             new ZBlock(),
         };
 
-        private readonly Random random = new Random();
+        private Random random;
 
         public Block NextBlock { get; private set; }
 
-        public BlockQueue()
+        public BlockQueue(int seed)
         {
+            random = new Random(seed);
             NextBlock = RandomBlock();
-            Console.WriteLine(NextBlock.Id);
         }
 
         public Block RandomBlock()
