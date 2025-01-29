@@ -40,7 +40,7 @@ namespace TetraClashDec24
         {
             if (isFound)
             {
-                App.ChangeState(new MainGameState(App, prevClickState, matchID, seed));
+                App.ChangeState(new MainGameState(App, prevClickState)); //, matchID, seed
             }
 
             MouseState mouse = Mouse.GetState();

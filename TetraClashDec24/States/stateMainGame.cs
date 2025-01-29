@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace TetraClashDec24
 {
@@ -12,8 +13,8 @@ namespace TetraClashDec24
         private Texture2D gridTexture;
 
         private int tileSize;
-        private int gridX;
-        private int gridY;
+        private int PlayerGridX;
+        private int PlayerGridY;
         private int EnemyGridX;
         private int EnemyGridY;
 
@@ -30,7 +31,7 @@ namespace TetraClashDec24
         private KeyboardState prevKeyboardState;
         private ButtonState prevClickState;
 
-        public MainGameState(App app, ButtonState clickState, ) : base(app)
+        public MainGameState(App app, ButtonState clickState) : base(app)
         {
             prevClickState = clickState;
 
@@ -38,12 +39,15 @@ namespace TetraClashDec24
             gameState = new GameState();
 
             tileSize = 25;
-            gridX = 1920 / 2 - (gameState.GameGrid.Collumns * tileSize / 2);
-            gridY = 1080 / 2 - ((gameState.GameGrid.Rows - 2) * tileSize / 2);
+            PlayerGridX = 1920 / 4 - (gameState.GameGrid.Collumns * tileSize / 2);
+            PlayerGridY = 1080 / 2 - ((gameState.GameGrid.Rows - 2) * tileSize / 2);
+            EnemyGridX = 1920 * 3 / 4 - (gameState.GameGrid.Collumns * tileSize / 2);
+            EnemyGridY = PlayerGridY;
 
             dropTimer = 0;
             dropRate = 500;
         }
+
 
         public override void LoadContent()
         {
@@ -104,7 +108,6 @@ namespace TetraClashDec24
             }
             fastDrop = fastSwitch;
 
-            dropTimer += gameTime.ElapsedGameTime.Milliseconds;
 
             if (fastDrop)
             {
@@ -124,17 +127,36 @@ namespace TetraClashDec24
             }
         }
 
-        public override void Draw(GameTime gameTime)
+        private void AsyncDraw()
         {
             SpriteBatch spriteBatch = new SpriteBatch(App.GraphicsDevice);
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-            spriteBatch.Draw(gridTexture, new Rectangle(gridX, gridY, gameState.GameGrid.Collumns * tileSize, gameState.GameGrid.Rows * tileSize), Color.Black);
-            DrawGrid(spriteBatch, gameState.GameGrid, gridX, gridY);
-            DrawBlock(spriteBatch, gameState.CurrentBlock, gridX, gridY);
-            DrawGhostBlock(spriteBatch, gameState.CurrentBlock);
+            spriteBatch.Draw(gridTexture, new Rectangle(PlayerGridX, PlayerGridY, gameState.GameGrid.Collumns * tileSize, gameState.GameGrid.Rows * tileSize), Color.Black);
+            DrawGrid(spriteBatch, gameState.GameGrid, PlayerGridX, PlayerGridY);
+            DrawGrid(spriteBatch, gameState.GameGrid, EnemyGridX, EnemyGridY);
+            DrawBlock(spriteBatch, gameState.CurrentBlock, PlayerGridX, PlayerGridY);
+            DrawGhostBlock(spriteBatch, gameState.CurrentBlock, PlayerGridX, PlayerGridY);
 
             spriteBatch.End();
+        }
+        private async Task GameLoop()
+        {
+            AsyncDraw();
+            
+            while (!gameState.GameOver)
+            {
+                if (fastDrop)
+                {
+                    await Task.Delay(dropRate/10);
+                }
+                else
+                {
+                    await Task.Delay(dropRate);
+                }
+                gameState.MoveBlockDown();
+                AsyncDraw();
+            }
         }
 
         private void DrawGrid(SpriteBatch spriteBatch, GameGrid grid, int x, int y)
@@ -160,13 +182,13 @@ namespace TetraClashDec24
             }
         }
 
-        private void DrawGhostBlock(SpriteBatch spriteBatch, Block block)
+        private void DrawGhostBlock(SpriteBatch spriteBatch, Block block, int x, int y)
         {
             int dropDistance = gameState.BlockDropDistance();
 
             foreach (Position p in block.TilePositions())
             {
-                spriteBatch.Draw(blockTextures[block.Id - 1], new Rectangle(gridX + (p.Column * tileSize), gridY + ((p.Row + dropDistance) * tileSize), tileSize, tileSize), new Color(255, 255, 255, 64));
+                spriteBatch.Draw(blockTextures[block.Id - 1], new Rectangle(x + (p.Column * tileSize), y + ((p.Row + dropDistance) * tileSize), tileSize, tileSize), new Color(64, 64, 64, 64));
             }
         }
     }
