@@ -14,12 +14,15 @@ namespace TetraClashDec24
         private int tileSize;
         private int gridX;
         private int gridY;
+        private int EnemyGridX;
+        private int EnemyGridY;
 
         private int dropTimer;
         private int dropRate;
         private bool fastDrop;
 
         private GameState gameState;
+        private GameGrid enemyGameGrid;
 
         private KeyboardState keyboard;
         private MouseState mouse;
@@ -54,6 +57,7 @@ namespace TetraClashDec24
 
         public override void Update(GameTime gameTime)
         {
+
             prevKeyboardState = keyboard;
             mouse = Mouse.GetState();
             keyboard = Keyboard.GetState();
@@ -85,7 +89,7 @@ namespace TetraClashDec24
                     }
                     else if (key == Keys.Up)
                     {
-                        gameState.HardDrop();
+                        gameState.DropBlock();
                     }
                     else if (key == Keys.Z)
                     {
@@ -124,15 +128,16 @@ namespace TetraClashDec24
         {
             SpriteBatch spriteBatch = new SpriteBatch(App.GraphicsDevice);
 
-            spriteBatch.Begin();
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             spriteBatch.Draw(gridTexture, new Rectangle(gridX, gridY, gameState.GameGrid.Collumns * tileSize, gameState.GameGrid.Rows * tileSize), Color.Black);
-            DrawGrid(spriteBatch, gameState.GameGrid);
+            DrawGrid(spriteBatch, gameState.GameGrid, gridX, gridY);
             DrawBlock(spriteBatch, gameState.CurrentBlock);
+            DrawGhostBlock(spriteBatch, gameState.CurrentBlock);
 
             spriteBatch.End();
         }
 
-        private void DrawGrid(SpriteBatch spriteBatch, GameGrid grid)
+        private void DrawGrid(SpriteBatch spriteBatch, GameGrid grid, int x, int y)
         {
             for (int r = 0; r < grid.Rows; r++)
             {
@@ -141,17 +146,27 @@ namespace TetraClashDec24
                     int id = grid[r, c];
                     if (id != 0)
                     {
-                        spriteBatch.Draw(blockTextures[id - 1], new Rectangle(gridX + (c * tileSize), gridY + (r * tileSize), tileSize, tileSize), Color.White);
+                        spriteBatch.Draw(blockTextures[id - 1], new Rectangle(x + (c * tileSize), y + (r * tileSize), tileSize, tileSize), Color.White);
                     }
                 }
             }
         }
 
-        private void DrawBlock(SpriteBatch spriteBatch, Block block)
+        private void DrawBlock(SpriteBatch spriteBatch, Block block, int x, int y)
         {
             foreach (Position p in block.TilePositions())
             {
-                spriteBatch.Draw(blockTextures[block.Id - 1], new Rectangle(gridX + (p.Column * tileSize), gridY + (p.Row * tileSize), tileSize, tileSize), Color.White);
+                spriteBatch.Draw(blockTextures[block.Id - 1], new Rectangle(x + (p.Column * tileSize), y + (p.Row * tileSize), tileSize, tileSize), Color.White);
+            }
+        }
+
+        private void DrawGhostBlock(SpriteBatch spriteBatch, Block block)
+        {
+            int dropDistance = gameState.BlockDropDistance();
+
+            foreach (Position p in block.TilePositions())
+            {
+                spriteBatch.Draw(blockTextures[block.Id - 1], new Rectangle(gridX + (p.Column * tileSize), gridY + ((p.Row + dropDistance) * tileSize), tileSize, tileSize), new Color(255, 255, 255, 64));
             }
         }
     }

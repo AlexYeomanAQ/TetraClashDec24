@@ -96,6 +96,7 @@ namespace TetraClashDec24
 
             if (IsGameOver())
             {
+                Console.WriteLine("game over");
                 GameOver = true;
             }
             else
@@ -104,7 +105,7 @@ namespace TetraClashDec24
             }
         }
 
-        public bool MoveBlockDown()
+        public void MoveBlockDown()
         {
             CurrentBlock.Move(1, 0);
 
@@ -112,21 +113,37 @@ namespace TetraClashDec24
             {
                 CurrentBlock.Move(-1, 0);
                 PlaceBlock();
-                return true;
             }
-
-            return false;
         }
 
-        public void HardDrop()
+        private int TileDropDistance(Position p)
         {
-            while (true)
+            int drop = 0;
+
+            while (GameGrid.IsEmpty(p.Row + 1 + drop, p.Column))
             {
-                if(MoveBlockDown())
-                {
-                    return;
-                }
+                drop++;
             }
+
+            return drop;
+        }
+
+        public int BlockDropDistance()
+        {
+            int drop = GameGrid.Rows;
+
+            foreach (Position p in CurrentBlock.TilePositions())
+            {
+                drop = System.Math.Min(drop, TileDropDistance(p));
+            }
+
+            return drop;
+        }
+
+        public void DropBlock()
+        {
+            CurrentBlock.Move(BlockDropDistance(), 0);
+            PlaceBlock();
         }
     }
 }

@@ -44,7 +44,6 @@ namespace TetraClashDec24
                     return false;
                 }
             }
-
             return true;
         }
 
