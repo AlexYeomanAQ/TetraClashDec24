@@ -30,7 +30,7 @@ namespace TetraClashDec24
         private KeyboardState prevKeyboardState;
         private ButtonState prevClickState;
 
-        public MainGameState(App app, ButtonState clickState) : base(app)
+        public MainGameState(App app, ButtonState clickState, ) : base(app)
         {
             prevClickState = clickState;
 
@@ -131,7 +131,7 @@ namespace TetraClashDec24
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             spriteBatch.Draw(gridTexture, new Rectangle(gridX, gridY, gameState.GameGrid.Collumns * tileSize, gameState.GameGrid.Rows * tileSize), Color.Black);
             DrawGrid(spriteBatch, gameState.GameGrid, gridX, gridY);
-            DrawBlock(spriteBatch, gameState.CurrentBlock);
+            DrawBlock(spriteBatch, gameState.CurrentBlock, gridX, gridY);
             DrawGhostBlock(spriteBatch, gameState.CurrentBlock);
 
             spriteBatch.End();

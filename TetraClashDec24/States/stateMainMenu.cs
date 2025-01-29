@@ -29,7 +29,7 @@ namespace TetraClashDec24
                 Point mousePosition = new Point(mouse.X, mouse.Y);
                 if (PlayButton.Box.Contains(mousePosition))
                 {
-                    App.ChangeState(new MainGameState(App, mouse.LeftButton));
+                    App.ChangeState(new SearchState(App, mouse.LeftButton));
                 }
             }
             prevClickState = mouse.LeftButton;

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System;
+using System.ComponentModel.Design;
 
 namespace TetraClashDec24
 {
@@ -16,6 +17,7 @@ namespace TetraClashDec24
 
         private bool isFound;
         private string searchMessage = "";
+        int seed;
         private int matchID;
 
         private ButtonState prevClickState;
@@ -31,14 +33,14 @@ namespace TetraClashDec24
             CancelButton = new Button(@"base", 860, 710, 200, 100, Color.White, "Cancel");
             CancelButton.LoadContent(App.Content);
 
-            SearchFont = App.Content.Load<SpriteFont>(@"myFont");
+            SearchFont = App.Content.Load<SpriteFont>(@"titleFont");
         }
 
         public override void Update(GameTime gameTime)
         {
             if (isFound)
             {
-                App.ChangeState(new MainGameState(App, prevClickState));
+                App.ChangeState(new MainGameState(App, prevClickState, matchID, seed));
             }
 
             MouseState mouse = Mouse.GetState();
@@ -75,7 +77,12 @@ namespace TetraClashDec24
 
                 if (response.StartsWith("found:"))
                 {
-                    matchID = int.Parse(response.Substring(6));
+                    string[] args = response.Split(':');
+
+                    matchID = int.Parse(args[1]);
+                    seed = int.Parse(args[2]);
+
+                    
                     searchMessage = $"Match Found! ID: {matchID}";
                 }
                 else
