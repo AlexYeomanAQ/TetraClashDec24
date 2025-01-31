@@ -34,7 +34,6 @@ namespace TetraClashDec24
 
             if (File.Exists(cachePath))
             {
-                string username = File.ReadAllText(cachePath);
                 _currentState = new MainGameState(this, mouse.LeftButton);
             }
             else
@@ -56,8 +55,6 @@ namespace TetraClashDec24
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
-
             _currentState.Update(gameTime);
             base.Update(gameTime);
         }
@@ -66,7 +63,6 @@ namespace TetraClashDec24
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
             spriteBatch.Begin();
             spriteBatch.Draw(_background, new Rectangle(0, 0, 1920, 1080), Color.White);
             spriteBatch.End();

@@ -1,18 +1,26 @@
 ﻿using Microsoft.Xna.Framework;
+using System.Threading.Tasks;
 
 namespace TetraClashDec24
 {
     public abstract class AppState
     {
-        protected App App;
+        protected App App { get; }
 
-        public AppState(App app)
+        protected AppState(App app)
         {
             App = app;
         }
 
         public abstract void LoadContent();
-        public abstract void Update(GameTime gameTime);
+
+        public virtual void Update(GameTime gameTime)
+        {
+            RunUpdateAsync(gameTime);
+        }
+
+        protected virtual Task RunUpdateAsync(GameTime gameTime) => Task.CompletedTask;
+
         public abstract void Draw(GameTime gameTime);
     }
 }

@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace TetraClashDec24
@@ -21,6 +20,7 @@ namespace TetraClashDec24
         private int dropTimer;
         private int dropRate;
         private bool fastDrop;
+        private bool _isTaskRunning;
 
         private GameState gameState;
         private GameGrid enemyGameGrid;
@@ -48,7 +48,6 @@ namespace TetraClashDec24
             dropRate = 500;
         }
 
-
         public override void LoadContent()
         {
             for (int i = 0; i < blockTextures.Length; i++)
@@ -61,7 +60,6 @@ namespace TetraClashDec24
 
         public override void Update(GameTime gameTime)
         {
-
             prevKeyboardState = keyboard;
             mouse = Mouse.GetState();
             keyboard = Keyboard.GetState();
@@ -80,54 +78,52 @@ namespace TetraClashDec24
                 {
                     fastSwitch = false;
                 }
+
                 if (prevKeyboardState.IsKeyUp(key))
                 {
-                    Console.WriteLine("test");
-                    if (key == Keys.Left)
-                    {
-                        gameState.MoveBlockLeft();
-                    }
-                    else if (key == Keys.Right)
-                    {
-                        gameState.MoveBlockRight();
-                    }
-                    else if (key == Keys.Up)
-                    {
-                        gameState.DropBlock();
-                    }
-                    else if (key == Keys.Z)
-                    {
-                        gameState.RotateBlockCCW();
-                    }
-                    else if (key == Keys.X)
-                    {
-                        gameState.RotateBlockCW();
-                    }
-
+                    if (key == Keys.Left) gameState.MoveBlockLeft();
+                    else if (key == Keys.Right) gameState.MoveBlockRight();
+                    else if (key == Keys.Up) gameState.DropBlock();
+                    else if (key == Keys.Z) gameState.RotateBlockCCW();
+                    else if (key == Keys.X) gameState.RotateBlockCW();
                 }
             }
+
             fastDrop = fastSwitch;
 
-
-            if (fastDrop)
+            if (!_isTaskRunning)
             {
-                if (dropTimer >= dropRate/10)
-                {
-                    dropTimer = 0;
-                    gameState.MoveBlockDown();
-                }
-            }
-            else
-            {
-                if (dropTimer >= dropRate)
-                {
-                    dropTimer = 0;
-                    gameState.MoveBlockDown();
-                }
+                RunAsyncUpdateTask();
             }
         }
 
-        private void AsyncDraw()
+        private async void RunAsyncUpdateTask()
+        {
+            _isTaskRunning = true;
+
+            try
+            {
+                while (!gameState.GameOver)
+                {
+                    if (fastDrop)
+                    {
+                        await Task.Delay(dropRate / 10);
+                    }
+                    else
+                    {
+                        await Task.Delay(dropRate);
+                    }
+
+                    gameState.MoveBlockDown();
+                }
+            }
+            finally
+            {
+                _isTaskRunning = false;
+            }
+        }
+
+        public override void Draw(GameTime gameTime)
         {
             SpriteBatch spriteBatch = new SpriteBatch(App.GraphicsDevice);
 
@@ -137,26 +133,7 @@ namespace TetraClashDec24
             DrawGrid(spriteBatch, gameState.GameGrid, EnemyGridX, EnemyGridY);
             DrawBlock(spriteBatch, gameState.CurrentBlock, PlayerGridX, PlayerGridY);
             DrawGhostBlock(spriteBatch, gameState.CurrentBlock, PlayerGridX, PlayerGridY);
-
             spriteBatch.End();
-        }
-        private async Task GameLoop()
-        {
-            AsyncDraw();
-            
-            while (!gameState.GameOver)
-            {
-                if (fastDrop)
-                {
-                    await Task.Delay(dropRate/10);
-                }
-                else
-                {
-                    await Task.Delay(dropRate);
-                }
-                gameState.MoveBlockDown();
-                AsyncDraw();
-            }
         }
 
         private void DrawGrid(SpriteBatch spriteBatch, GameGrid grid, int x, int y)
