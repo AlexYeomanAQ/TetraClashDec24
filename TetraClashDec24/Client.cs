@@ -22,7 +22,10 @@ namespace TetraClashDec24
                 byte[] responseBuffer = new byte[1024];
                 int bytesRead = stream.Read(responseBuffer, 0, responseBuffer.Length);
                 string response = Encoding.UTF8.GetString(responseBuffer, 0, bytesRead);
-
+                if (response == null)
+                {
+                    Console.WriteLine("Hello");
+                }
                 // Close the connection
                 stream.Close();
                 client.Close();

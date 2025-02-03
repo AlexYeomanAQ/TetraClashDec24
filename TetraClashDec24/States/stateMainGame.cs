@@ -20,10 +20,12 @@ namespace TetraClashDec24
         private int dropTimer;
         private int dropRate;
         private bool fastDrop;
-        private bool _isTaskRunning;
+        private bool _isBlockTaskRunning;
 
         private GameState gameState;
+
         private GameGrid enemyGameGrid;
+        private bool _isFetchTaskRunning;
 
         private KeyboardState keyboard;
         private MouseState mouse;
@@ -81,25 +83,46 @@ namespace TetraClashDec24
 
                 if (prevKeyboardState.IsKeyUp(key))
                 {
-                    if (key == Keys.Left) gameState.MoveBlockLeft();
-                    else if (key == Keys.Right) gameState.MoveBlockRight();
-                    else if (key == Keys.Up) gameState.DropBlock();
-                    else if (key == Keys.Z) gameState.RotateBlockCCW();
-                    else if (key == Keys.X) gameState.RotateBlockCW();
+                    if (key == Keys.Left)
+                    {
+                        gameState.MoveBlockLeft();
+                    }
+
+                    else if (key == Keys.Right)
+                    {
+                        gameState.MoveBlockRight();
+                    }
+                    else if (key == Keys.Up)
+                    {
+                        gameState.DropBlock();
+                    }
+                    else if (key == Keys.Z)
+                    {
+                        gameState.RotateBlockCCW();
+                    }
+                    else if (key == Keys.X)
+                    {
+                        gameState.RotateBlockCW();
+                    }
                 }
             }
 
             fastDrop = fastSwitch;
 
-            if (!_isTaskRunning)
+            if (!_isBlockTaskRunning)
             {
-                RunAsyncUpdateTask();
+                DropBlock();
             }
+
+            //if (!_isFetchTaskRunning)
+            //{
+            //    enemyGameGrid = fetchEnemyGameGrid()
+            //}
         }
 
-        private async void RunAsyncUpdateTask()
+        private async void DropBlock()
         {
-            _isTaskRunning = true;
+            _isBlockTaskRunning = true;
 
             try
             {
@@ -119,9 +142,11 @@ namespace TetraClashDec24
             }
             finally
             {
-                _isTaskRunning = false;
+                _isBlockTaskRunning = false;
             }
         }
+
+
 
         public override void Draw(GameTime gameTime)
         {

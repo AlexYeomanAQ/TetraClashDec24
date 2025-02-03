@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace TetraClashDec24
 {
-    class Button : AppObject
+    class Button : Object
     {
         public Rectangle Box;
         public string TexturePath;
@@ -73,7 +73,7 @@ namespace TetraClashDec24
             else
                 spriteBatch.Draw(baseTexture, Box, Color.White);
 
-            if (Text != "")
+            if (Text != "" && Text != null)
             {
                 Vector2 textSize = baseFont.MeasureString(Text);
                 float textX = Box.X + (Box.Width / 2) - (textSize.X / 2);

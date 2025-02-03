@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace TetraClashDec24
 {
-    class AppObject
+    class Object
     {
         public Vector2 startLocation;
         protected Texture2D baseTexture;

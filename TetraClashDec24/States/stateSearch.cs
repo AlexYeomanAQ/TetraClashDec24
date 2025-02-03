@@ -1,12 +1,9 @@
 ﻿using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
-using System.Text.RegularExpressions;
 using System;
-using System.ComponentModel.Design;
+using System.Reflection.Metadata.Ecma335;
 
 namespace TetraClashDec24
 {
@@ -20,12 +17,13 @@ namespace TetraClashDec24
         int seed;
         private int matchID;
 
+        private MouseState mouse;
         private ButtonState prevClickState;
         public SearchState(App app, ButtonState clickState) : base(app)
         {
             prevClickState = clickState;
             isFound = false;
-            StartSearchAsync();
+            SearchAsync();
         }
 
         public override void LoadContent()
@@ -43,14 +41,14 @@ namespace TetraClashDec24
                 App.ChangeState(new MainGameState(App, prevClickState)); //, matchID, seed
             }
 
-            MouseState mouse = Mouse.GetState();
+            mouse = Mouse.GetState();
 
             if (mouse.LeftButton == ButtonState.Pressed && prevClickState != mouse.LeftButton)
             {
                 Point mousePosition = new Point(mouse.X, mouse.Y);
                 if (CancelButton.Box.Contains(mousePosition))
                 {
-                    //Add request to cancel
+                    CancelAsync();
                 }
             }
             prevClickState = mouse.LeftButton;
@@ -68,7 +66,7 @@ namespace TetraClashDec24
             spriteBatch.End();
         }
 
-        private async void StartSearchAsync()
+        private async void SearchAsync()
         {
             searchMessage = "Searching...";
             try
@@ -81,22 +79,39 @@ namespace TetraClashDec24
 
                     matchID = int.Parse(args[1]);
                     seed = int.Parse(args[2]);
-
                     
                     searchMessage = $"Match Found! ID: {matchID}";
+
+                    isFound = true;
                 }
                 else
                 {
-                    searchMessage = "No Match Found";
+                    Console.WriteLine(response);
+                    searchMessage = "Error During Matchmaking. Press Cancel";
                 }
             }
             catch (Exception ex)
             {
                 searchMessage = $"Error: {ex.Message}";
             }
-            finally
+        }
+
+        private async void CancelAsync()
+        {
+            searchMessage = "Cancelling...";
+            try
             {
-                isFound = true;
+                string response = await Task.Run(() => Client.sendMessage($"cancel:{App.Username}"));
+
+                if (response == "Success")
+                {
+                    App.ChangeState(new MainMenuState(App, prevClickState));
+                }
+                //Any other response should mean that the user has found a match.
+            }
+            catch (Exception ex)
+            {
+                searchMessage = $"Error: {ex.Message}";
             }
         }
     }

@@ -34,7 +34,7 @@ namespace TetraClashDec24
 
             if (File.Exists(cachePath))
             {
-                _currentState = new MainGameState(this, mouse.LeftButton);
+                _currentState = new LoginState(this, mouse.LeftButton, Username);
             }
             else
             {

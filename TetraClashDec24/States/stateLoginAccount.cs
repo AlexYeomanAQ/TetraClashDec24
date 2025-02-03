@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Threading.Tasks;
 
 namespace TetraClashDec24
 {
@@ -9,21 +10,24 @@ namespace TetraClashDec24
     {
 
         private InputButton usernameBox;
-        private string UBDefaultString = "Enter Username";
         private InputButton passwordBox;
-        private string PBDefaultString = "Enter Password";
-
-        private string ErrorString = "";
 
         private Button submitButton;
         private Button createAccountButton;
 
+        private Texture2D titleTexture;
+
+        private SpriteFont font;
+        private SpriteFont titleFont;
+
+        private string ErrorString = "";
+        private string UBDefaultString = "Enter Username";
+        private string PBDefaultString = "Enter Password";
+
         private string username = "";
         private string password = "";
 
-
-        private SpriteFont font;
-        private string inputTexturePath = @"base";
+        private string basePath = @"base";
 
         private KeyboardState keyboard;
         private MouseState mouse;
@@ -43,16 +47,22 @@ namespace TetraClashDec24
 
         public override void LoadContent()
         {
-            usernameBox = new InputButton(inputTexturePath, 380, 490, 200, 100, Color.White, username);
+            usernameBox = new InputButton(basePath, 835, 600, 250, 50, Color.White, username);
             usernameBox.LoadContent(App.Content);
 
-            passwordBox = new InputButton(inputTexturePath, 1340, 490, 200, 100, Color.White, PBDefaultString);
+            passwordBox = new InputButton(basePath, 835, 675, 250, 50, Color.White, PBDefaultString);
             passwordBox.LoadContent(App.Content);
 
-            submitButton = new Button(inputTexturePath, 860, 760, 200, 100, Color.White, "Submit!");
+            submitButton = new Button(basePath, 885, 750, 150, 100, Color.White, "Submit!");
             submitButton.LoadContent(App.Content);
 
+            createAccountButton = new Button(basePath, 885, 875, 150, 100, Color.White, "Create new account");
+            createAccountButton.LoadContent(App.Content);
+
+            titleTexture = App.Content.Load<Texture2D>(@"tempLogo");
+
             font = App.Content.Load<SpriteFont>(@"myFont");
+            titleFont = App.Content.Load<SpriteFont>(@"titleFont");
         }
 
 
@@ -73,39 +83,13 @@ namespace TetraClashDec24
                 {
                     focusedField = InputField.Password;
                 }
+                else if (createAccountButton.Box.Contains(mousePosition))
+                {
+                    App.ChangeState(new CreateAccountState(App, mouse.LeftButton));
+                }
                 else if (submitButton.Box.Contains(mousePosition))
                 {
-                    string salt = Client.sendMessage($"salt{username}");
-                    if (salt == "Username")
-                    {
-                        ErrorString = "Error: Username could not be found.";
-                        username = "";
-                        password = "";
-                    }
-                    else if (salt.Contains(" "))
-                    {
-                        ErrorString = $"Unknown error: {salt}";
-                    }
-                    else
-                    {
-                        string hash = Security.GenerateHash(password, salt);
-                        string message = $"login{username}:{hash}";
-                        string response = Client.sendMessage(message);
-                        if (response == "Success")
-                        {
-                            App.Username = username;
-                            App.ChangeState(new MainMenuState(App, mouse.LeftButton));
-                        }
-                        else if (response == "Password")
-                        {
-                            ErrorString = "Error: Password is incorrect, please retry.";
-                            password = "";
-                        }
-                        else
-                        {
-                            ErrorString = $"Unknown error: {response}";
-                        }
-                    }
+                    LoginAsync();
                 }
                 else
                 {
@@ -151,6 +135,7 @@ namespace TetraClashDec24
             usernameBox.Draw(spriteBatch);
             passwordBox.Draw(spriteBatch);
             submitButton.Draw(spriteBatch);
+            createAccountButton.Draw(spriteBatch);
             if (ErrorString != "")
             {
                 Vector2 textSize = font.MeasureString(ErrorString);
@@ -221,6 +206,41 @@ namespace TetraClashDec24
                 }
             }
             return currentText;
+        }
+
+        private async void LoginAsync()
+        {
+            string salt = await Task.Run(() => Client.sendMessage($"salt{username}"));
+            if (salt == "Username")
+            {
+                ErrorString = "Error: Username could not be found.";
+                username = "";
+                password = "";
+            }
+            else if (salt.Contains(" "))
+            {
+                ErrorString = $"Unknown error: {salt}";
+            }
+            else
+            {
+                string hash = Security.GenerateHash(password, salt);
+                string message = $"login{username}:{hash}";
+                string response = await Task.Run(() => Client.sendMessage(message));
+                if (response == "Success")
+                {
+                    App.Username = username;
+                    App.ChangeState(new MainMenuState(App, mouse.LeftButton));
+                }
+                else if (response == "Password")
+                {
+                    ErrorString = "Error: Password is incorrect, please retry.";
+                    password = "";
+                }
+                else
+                {
+                    ErrorString = $"Unknown error: {response}";
+                }
+            }
         }
     }
 }
