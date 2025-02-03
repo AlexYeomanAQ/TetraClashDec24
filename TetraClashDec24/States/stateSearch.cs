@@ -71,7 +71,7 @@ namespace TetraClashDec24
             searchMessage = "Searching...";
             try
             {
-                string response = await Task.Run(() => Client.sendMessage($"search:{App.Username}"));
+                string response = await Task.Run(() => Client.SendMessageAsync($"search:{App.Username}"));
 
                 if (response.StartsWith("found:"))
                 {
@@ -101,7 +101,7 @@ namespace TetraClashDec24
             searchMessage = "Cancelling...";
             try
             {
-                string response = await Task.Run(() => Client.sendMessage($"cancel:{App.Username}"));
+                string response = await Task.Run(() => Client.SendMessageAsync($"cancel:{App.Username}"));
 
                 if (response == "Success")
                 {

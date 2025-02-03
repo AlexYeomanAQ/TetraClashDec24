@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace TetraClashDec24
 {
@@ -35,7 +36,7 @@ namespace TetraClashDec24
         private ButtonState prevClickState;
 
         bool isCapsLockOn = false;
-        private enum InputField { None, Username, Password }
+        private enum InputField {None, Username, Password}
         private InputField focusedField = InputField.None;
 
         public CreateAccountState(App app, ButtonState clickState) : base(app)
@@ -80,28 +81,7 @@ namespace TetraClashDec24
                 }
                 else if (submitButton.Box.Contains(mousePosition))
                 {
-                    string salt = Security.GenerateSalt();
-                    string hash = Security.GenerateHash(password, salt);
-                    string message = $"create{username}:{hash}:{salt}";
-                    string response = Client.sendMessage(message);
-
-                    if (response == "Success")
-                    {
-                        using (StreamWriter writer = new StreamWriter("cache.txt"))
-                        {
-                            writer.Write(username);
-                        }
-                        App.Username = username;
-                        App.ChangeState(new MainMenuState(App, mouse.LeftButton));
-                    }
-                    else if (response == "Player Exists")
-                    {
-                        ErrorString = "Username already exists, please select a new one or log in.";
-                    }
-                    else
-                    {
-                        ErrorString = $"Unknown Error: {response}";
-                    }
+                    SubmitAccountAsync();
                 }
                 else
                 {
@@ -109,15 +89,17 @@ namespace TetraClashDec24
                 }
             }
 
+            string input = HandleInput(keyboard, prevKeyboardState, ref isCapsLockOn, true);
+
             if (focusedField == InputField.Username)
             {
-                username = HandleInput(username, keyboard, prevKeyboardState, ref isCapsLockOn);
+                username = input;
                 usernameBox.Text = username;
                 usernameBox.highlighted = true;
             }
             else if (focusedField == InputField.Password)
             {
-                password = HandleInput(password, keyboard, prevKeyboardState, ref isCapsLockOn, true);
+                password = input;
                 passwordBox.Text = new string('*', password.Length);
                 passwordBox.highlighted = true;
             }
@@ -162,25 +144,50 @@ namespace TetraClashDec24
             spriteBatch.End();
         }
 
-        private string HandleInput(string currentText, KeyboardState keyboard, KeyboardState prevKeyboardState, ref bool isCapsLockOn, bool takeSpecialCharacters = false)
+        private string HandleInput(KeyboardState keyboard, KeyboardState prevKeyboardState, ref bool isCapsLockOn, bool takeSpecialCharacters = false)
         {
+            string text = "";
+            if (focusedField == InputField.Username)
+            {
+                text = username;
+            }
+            else if (focusedField == InputField.Password)
+            {
+                text = password;
+            } 
             Keys[] pressedKeys = keyboard.GetPressedKeys();
             bool isShiftPressed = keyboard.IsKeyDown(Keys.LeftShift) || keyboard.IsKeyDown(Keys.RightShift);
-
             foreach (Keys key in pressedKeys)
             {
                 // Process only if the key was not pressed in the previous state
                 if (prevKeyboardState.IsKeyUp(key))
                 {
-                    if (key == Keys.Back && currentText.Length > 0)
+                    if (key == Keys.Tab)
+                    {
+                        // Handle Tab
+                        text = CycleInputField();
+                    }
+                    else if (key == Keys.Enter)
+                    {
+                        // Handle Enter
+                        if (username == "" || password == "")
+                        {
+                            CycleInputField();
+                        }
+                        else
+                        {
+                            SubmitAccountAsync();
+                        }
+                    }
+                    else if (key == Keys.Back && text.Length > 0)
                     {
                         // Handle backspace
-                        currentText = currentText.Remove(currentText.Length - 1);
+                        text = text.Remove(text.Length - 1);
                     }
                     else if (key == Keys.Space)
                     {
                         // Handle space
-                        currentText += " ";
+                        text += " ";
                     }
                     else if (key == Keys.CapsLock)
                     {
@@ -200,7 +207,7 @@ namespace TetraClashDec24
                         {
                             letter = char.ToLower(letter);
                         }
-                        currentText += letter;
+                        text += letter;
                     }
                     else if (key >= Keys.D0 && key <= Keys.D9)
                     {
@@ -208,11 +215,11 @@ namespace TetraClashDec24
                         if (isShiftPressed && takeSpecialCharacters)
                         {
                             string shiftedNumbers = ")!@#$%^&*(";
-                            currentText += shiftedNumbers[key - Keys.D0];
+                            text += shiftedNumbers[key - Keys.D0];
                         }
                         else
                         {
-                            currentText += (char)('0' + (key - Keys.D0));
+                            text += (char)('0' + (key - Keys.D0));
                         }
                     }
                     else if (key == Keys.Enter)
@@ -221,7 +228,42 @@ namespace TetraClashDec24
                     }
                 }
             }
-            return currentText;
+            return text;
+        }
+        private string CycleInputField()
+        {
+            focusedField = (InputField)(((int)focusedField + 1) % Enum.GetValues(typeof(InputField)).Length);
+            if (focusedField == InputField.Username)
+            {
+                return username;
+            }
+            else if (focusedField == InputField.Password)
+            {
+                return password;
+            }
+            return "";
+        }
+        private async Task SubmitAccountAsync()
+        {
+            string salt = Security.GenerateSalt();
+            string hash = Security.GenerateHash(password, salt);
+            string message = $"create{username}:{hash}:{salt}";
+            string response = await Client.SendMessageAsync(message);
+
+            if (response == "Success")
+            {
+                await File.WriteAllTextAsync("cache.txt", username);
+                App.Username = username;
+                App.ChangeState(new MainMenuState(App, mouse.LeftButton));
+            }
+            else if (response == "Player Exists")
+            {
+                ErrorString = "Username already exists, please select a new one or log in.";
+            }
+            else
+            {
+                ErrorString = $"Unknown Error: {response}";
+            }
         }
     }
 }

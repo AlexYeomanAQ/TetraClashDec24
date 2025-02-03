@@ -210,7 +210,7 @@ namespace TetraClashDec24
 
         private async void LoginAsync()
         {
-            string salt = await Task.Run(() => Client.sendMessage($"salt{username}"));
+            string salt = await Task.Run(() => Client.SendMessageAsync($"salt{username}"));
             if (salt == "Username")
             {
                 ErrorString = "Error: Username could not be found.";
@@ -225,7 +225,7 @@ namespace TetraClashDec24
             {
                 string hash = Security.GenerateHash(password, salt);
                 string message = $"login{username}:{hash}";
-                string response = await Task.Run(() => Client.sendMessage(message));
+                string response = await Task.Run(() => Client.SendMessageAsync(message));
                 if (response == "Success")
                 {
                     App.Username = username;
