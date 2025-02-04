@@ -48,7 +48,8 @@ namespace TetraClashDec24
 
             while (true)
             {
-                int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+                await Console.Out.WriteLineAsync("test");
+                int bytesRead = stream.Read(buffer, 0, buffer.Length);
                 if (bytesRead > 0)
                 {
                     string response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
