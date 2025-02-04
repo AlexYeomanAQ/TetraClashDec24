@@ -169,7 +169,6 @@ namespace TetraClashDec24
                     else if (key == Keys.CapsLock)
                     {
                         // Toggle Caps Lock state
-                        Console.WriteLine(isCapsLockOn);
                         isCapsLockOn = !isCapsLockOn;
                     }
                     else if (key >= Keys.A && key <= Keys.Z)

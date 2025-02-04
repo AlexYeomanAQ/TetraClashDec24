@@ -22,6 +22,7 @@ namespace TetraClashDec24
                         await stream.WriteAsync(buffer, 0, buffer.Length);
                         Console.WriteLine($"Sent: {message}");
 
+
                         string response = "";
                         byte[] responseBuffer = new byte[1024];
                         int bytesRead = await stream.ReadAsync(responseBuffer, 0, responseBuffer.Length);
@@ -39,7 +40,6 @@ namespace TetraClashDec24
                 return ex.Message;
             }
         }
-
         public static async Task<string[]> ListenForMatch()
         {
             TcpClient client = new TcpClient("localhost", 12345);
@@ -48,8 +48,7 @@ namespace TetraClashDec24
 
             while (true)
             {
-                await Console.Out.WriteLineAsync("test");
-                int bytesRead = stream.Read(buffer, 0, buffer.Length);
+                int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
                 if (bytesRead > 0)
                 {
                     string response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
@@ -59,14 +58,14 @@ namespace TetraClashDec24
                     {
                         return response.Split(':')[1..];
                     }
-                    else
-                    {
-                        Console.WriteLine(response);
-                        return null;
-                    }
+                }
+                else
+                {
+                    await Console.Out.WriteLineAsync("test");
                 }
             }
         }
+
         public static async Task SendGridAsync(int id, int[,] grid)
         {
             try
@@ -82,7 +81,6 @@ namespace TetraClashDec24
 
                         await stream.WriteAsync(buffer, 0, buffer.Length);
                         Console.WriteLine("Sent grid:");
-                        Console.WriteLine(gridJson);
                     }
                 }
             }
