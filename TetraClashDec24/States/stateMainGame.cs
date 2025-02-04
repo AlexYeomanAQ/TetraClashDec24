@@ -11,7 +11,7 @@ namespace TetraClashDec24
         private Texture2D[] blockTextures;
         private Texture2D gridTexture;
 
-        private int tileSize;
+        private int tileSize = 25;
         private int PlayerGridX;
         private int PlayerGridY;
         private int EnemyGridX;
@@ -20,11 +20,14 @@ namespace TetraClashDec24
         private int dropTimer;
         private int dropRate;
         private bool fastDrop;
-        private bool _isBlockTaskRunning;
 
         private GameState gameState;
 
-        private GameGrid enemyGameGrid;
+        private int MatchID;
+        private int[,] enemyGrid;
+
+        private bool _isBlockTaskRunning;
+        private bool _isSendTaskRunning;
         private bool _isFetchTaskRunning;
 
         private KeyboardState keyboard;
@@ -33,21 +36,25 @@ namespace TetraClashDec24
         private KeyboardState prevKeyboardState;
         private ButtonState prevClickState;
 
-        public MainGameState(App app, ButtonState clickState) : base(app)
+        public MainGameState(App app, ButtonState clickState, int matchID, int seed) : base(app)
         {
             prevClickState = clickState;
 
             blockTextures = new Texture2D[7];
-            gameState = new GameState();
 
-            tileSize = 25;
+            gameState = new GameState(seed);
+
             PlayerGridX = 1920 / 4 - (gameState.GameGrid.Collumns * tileSize / 2);
             PlayerGridY = 1080 / 2 - ((gameState.GameGrid.Rows - 2) * tileSize / 2);
             EnemyGridX = 1920 * 3 / 4 - (gameState.GameGrid.Collumns * tileSize / 2);
             EnemyGridY = PlayerGridY;
 
+            enemyGrid = new int[gameState.GameGrid.Rows, gameState.GameGrid.Collumns];
+
             dropTimer = 0;
             dropRate = 500;
+
+            MatchID = matchID;
         }
 
         public override void LoadContent()
@@ -114,39 +121,16 @@ namespace TetraClashDec24
                 DropBlock();
             }
 
-            //if (!_isFetchTaskRunning)
-            //{
-            //    enemyGameGrid = fetchEnemyGameGrid()
-            //}
-        }
-
-        private async void DropBlock()
-        {
-            _isBlockTaskRunning = true;
-
-            try
+            if (!_isSendTaskRunning)
             {
-                while (!gameState.GameOver)
-                {
-                    if (fastDrop)
-                    {
-                        await Task.Delay(dropRate / 10);
-                    }
-                    else
-                    {
-                        await Task.Delay(dropRate);
-                    }
-
-                    gameState.MoveBlockDown();
-                }
+                sendGrid();
             }
-            finally
+
+            if (!_isFetchTaskRunning)
             {
-                _isBlockTaskRunning = false;
+                getEnemyGrid();
             }
         }
-
-
 
         public override void Draw(GameTime gameTime)
         {
@@ -176,6 +160,59 @@ namespace TetraClashDec24
             }
         }
 
+        private async void DropBlock()
+        {
+            _isBlockTaskRunning = true;
+
+            try
+            {
+                while (!gameState.GameOver)
+                {
+                    if (fastDrop)
+                    {
+                        await Task.Delay(dropRate / 10);
+                    }
+                    else
+                    {
+                        await Task.Delay(dropRate);
+                    }
+
+                    gameState.MoveBlockDown();
+                }
+            }
+            finally
+            {
+                _isBlockTaskRunning = false;
+            }
+        }
+
+        private async void sendGrid()
+        {
+            _isSendTaskRunning = true;
+
+            try
+            {
+                await Client.SendGridAsync(MatchID, gameState.GameGrid.grid);
+            }
+            finally
+            {
+                _isSendTaskRunning = false;
+            }
+        }
+
+        private async void getEnemyGrid()
+        {
+            _isFetchTaskRunning = true;
+
+            try
+            {
+                enemyGrid = await Client.ReceiveGridAsync();
+            }
+            finally
+            {
+                _isFetchTaskRunning = false;
+            }
+        }
         private void DrawBlock(SpriteBatch spriteBatch, Block block, int x, int y)
         {
             foreach (Position p in block.TilePositions())

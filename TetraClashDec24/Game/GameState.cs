@@ -20,10 +20,10 @@ namespace TetraClashDec24
         public BlockQueue BlockQueue { get; }
         public bool GameOver { get; private set; }
 
-        public GameState()
+        public GameState(int seed)
         {
             GameGrid = new GameGrid(22, 10);
-            BlockQueue = new BlockQueue(1234);
+            BlockQueue = new BlockQueue(seed);
             CurrentBlock = BlockQueue.GetAndUpdate();
         }
 

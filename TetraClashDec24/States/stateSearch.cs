@@ -38,7 +38,7 @@ namespace TetraClashDec24
         {
             if (isFound)
             {
-                App.ChangeState(new MainGameState(App, prevClickState)); //, matchID, seed
+                App.ChangeState(new MainGameState(App, prevClickState, matchID, seed)); //, matchID, seed
             }
 
             mouse = Mouse.GetState();
@@ -71,23 +71,29 @@ namespace TetraClashDec24
             searchMessage = "Searching...";
             try
             {
+                string[] args = null;
                 string response = await Task.Run(() => Client.SendMessageAsync($"search:{App.Username}"));
 
-                if (response.StartsWith("found:"))
+                if (response == "Queue")
                 {
-                    string[] args = response.Split(':');
-
-                    matchID = int.Parse(args[1]);
-                    seed = int.Parse(args[2]);
-                    
-                    searchMessage = $"Match Found! ID: {matchID}";
-
-                    isFound = true;
+                   args = await Client.ListenForMatch();
                 }
                 else
                 {
                     Console.WriteLine(response);
                     searchMessage = "Error During Matchmaking. Press Cancel";
+                }
+                if (args == null)
+                {
+                    Console.WriteLine(response);
+                    searchMessage = "Error During Matchmaking. Press Cancel";
+                }
+                else
+                {
+                    matchID = int.Parse(args[0]);
+                    seed = int.Parse(args[1]);
+                    mouse = Mouse.GetState();
+                    App.ChangeState(new MainGameState(App, mouse.LeftButton, matchID, seed));
                 }
             }
             catch (Exception ex)

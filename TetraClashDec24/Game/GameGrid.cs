@@ -8,7 +8,7 @@ namespace TetraClashDec24
 {
     public class GameGrid
     {
-        private readonly int[,] grid;
+        public readonly int[,] grid;
         public int Rows { get;  }
         public int Collumns { get; }
 
