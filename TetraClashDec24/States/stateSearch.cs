@@ -77,6 +77,7 @@ namespace TetraClashDec24
                 if (response == "Queue")
                 {
                    args = await Client.ListenForMatch();
+                   await Console.Out.WriteLineAsync("code has gone past listen");
                 }
                 else
                 {

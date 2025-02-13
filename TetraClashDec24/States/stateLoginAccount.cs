@@ -1,8 +1,8 @@
 ﻿using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace TetraClashDec24
 {
@@ -136,6 +136,10 @@ namespace TetraClashDec24
             passwordBox.Draw(spriteBatch);
             submitButton.Draw(spriteBatch);
             createAccountButton.Draw(spriteBatch);
+
+            spriteBatch.DrawString(titleFont, "Login", Cogs.centreTextPos(titleFont, "Create an Account", 960, 475), Color.White);
+            spriteBatch.Draw(titleTexture, new Rectangle(760, 0, 400, 400), Color.White);
+
             if (ErrorString != "")
             {
                 Vector2 textSize = font.MeasureString(ErrorString);
@@ -209,14 +213,14 @@ namespace TetraClashDec24
 
         private async void LoginAsync()
         {
-            string salt = await Task.Run(() => Client.SendMessageAsync($"salt{username}"));
+            string salt = await FetchSalt();
             if (salt == "Username")
             {
                 ErrorString = "Error: Username could not be found.";
                 username = "";
                 password = "";
             }
-            else if (salt.Contains(" "))
+            else if (salt.Contains(' '))
             {
                 ErrorString = $"Unknown error: {salt}";
             }
@@ -239,6 +243,18 @@ namespace TetraClashDec24
                 {
                     ErrorString = $"Unknown error: {response}";
                 }
+            }
+        }
+
+        private async Task<string> FetchSalt()
+        {
+            if (username == App.Username)
+            {
+                return File.ReadAllLines(App.CachePath)[1];
+            }
+            else
+            {
+                return await Task.Run(() => Client.SendMessageAsync($"salt{username}"));
             }
         }
     }

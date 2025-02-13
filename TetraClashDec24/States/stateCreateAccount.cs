@@ -223,7 +223,7 @@ namespace TetraClashDec24
                     }
                     else if (key == Keys.Enter)
                     {
-
+                        SubmitAccountAsync();
                     }
                 }
             }
@@ -251,7 +251,7 @@ namespace TetraClashDec24
 
             if (response == "Success")
             {
-                await File.WriteAllTextAsync("cache.txt", username);
+                await Cogs.saveCache(username, salt);
                 App.Username = username;
                 App.ChangeState(new MainMenuState(App, mouse.LeftButton));
             }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
@@ -30,7 +31,7 @@ namespace TetraClashDec24
 
                         Console.WriteLine(response);
 
-                        return response;
+                        return response.Replace("\n", "");
                     }
                 }
             }
@@ -42,29 +43,45 @@ namespace TetraClashDec24
         }
         public static async Task<string[]> ListenForMatch()
         {
-            TcpClient client = new TcpClient("localhost", 12345);
-            NetworkStream stream = client.GetStream();
-            byte[] buffer = new byte[1024];
-
-            while (true)
+            try
             {
-                int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-                if (bytesRead > 0)
-                {
-                    string response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                    Console.WriteLine("Received: " + response);
+                using TcpClient client = new TcpClient("localhost", 12345);
+                NetworkStream stream = client.GetStream();
 
-                    if (response.StartsWith("found:"))
-                    {
-                        return response.Split(':')[1..];
-                    }
-                }
-                else
+                byte[] buffer = new byte[1024];
+
+                while (true)
                 {
-                    await Console.Out.WriteLineAsync("test");
+                    await Task.Delay(500); // Give some time for data
+                    Console.WriteLine($"Bytes available: {client.Available}");
+
+                    if (client.Available > 0) // ✅ Check if there is data before reading
+                    {
+                        int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+                        string response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                        Console.WriteLine("Received: " + response);
+
+                        if (response.StartsWith("found"))
+                        {
+                            return response.Split(':')[1..];
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("No data yet...");
+                    }
+                    await Task.Delay(500);
                 }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+
+            return Array.Empty<string>();
         }
+
+
 
         public static async Task SendGridAsync(int id, int[,] grid)
         {

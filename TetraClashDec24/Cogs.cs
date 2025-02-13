@@ -1,15 +1,14 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace TetraClashDec24
 {
-    public static class Cogs
+    public class Cogs
     {
+
+
         public static readonly Vector2[][] TETROMINOBLOCKS = new Vector2[][]
         {
             new [] { new Vector2(0, 0), new Vector2(-1, 0), new Vector2(1, 0), new Vector2(0, -1) }, // T
@@ -26,6 +25,11 @@ namespace TetraClashDec24
             float textX = x - (textSize.X / 2);
             float textY = y - (textSize.Y / 2);
             return new Vector2((int)textX, (int)textY);
+        }
+
+        public static async Task saveCache(string username, string salt)
+        {
+            await File.WriteAllTextAsync("cache.txt", $"{username}\n{salt}");
         }
     }
 }

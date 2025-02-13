@@ -16,6 +16,7 @@ namespace TetraClashDec24
         private Texture2D _background;
 
         public string Username;
+        public string CachePath = "cache.txt";
         public App()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -29,11 +30,13 @@ namespace TetraClashDec24
 
         protected override void Initialize()
         {
-            string cachePath = "cache.txt";
+
             MouseState mouse = Mouse.GetState();
 
-            if (File.Exists(cachePath))
+            if (File.Exists(CachePath))
             {
+                string[] lines = File.ReadAllLines(CachePath);
+                Username = lines[0];
                 _currentState = new LoginState(this, mouse.LeftButton, Username);
             }
             else
