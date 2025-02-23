@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework.Graphics;
 using System.Threading.Tasks;
 using System;
 using System.Reflection.Metadata.Ecma335;
+using System.Net.Sockets;
+using System.Text;
 
 namespace TetraClashDec24
 {
@@ -22,8 +24,7 @@ namespace TetraClashDec24
         public SearchState(App app, ButtonState clickState) : base(app)
         {
             prevClickState = clickState;
-            isFound = false;
-            SearchAsync();
+            RunSearchAsync();
         }
 
         public override void LoadContent()
@@ -36,10 +37,6 @@ namespace TetraClashDec24
 
         public override void Update(GameTime gameTime)
         {
-            if (isFound)
-            {
-                App.ChangeState(new MainGameState(App, prevClickState, matchID, seed)); //, matchID, seed
-            }
 
             mouse = Mouse.GetState();
 
@@ -66,40 +63,36 @@ namespace TetraClashDec24
             spriteBatch.End();
         }
 
-        private async void SearchAsync()
+        private async Task RunSearchAsync()
         {
-            searchMessage = "Searching...";
-            try
-            {
-                string[] args = null;
-                string response = await Task.Run(() => Client.SendMessageAsync($"search:{App.Username}"));
+            TcpClient client = new TcpClient();
+            Console.WriteLine("Connecting to server...");
+            await client.ConnectAsync("127.0.0.1", 5000);
+            Console.WriteLine("Connected to server.");
+            NetworkStream stream = client.GetStream();
 
-                if (response == "Queue")
-                {
-                   args = await Client.ListenForMatch();
-                   await Console.Out.WriteLineAsync("code has gone past listen");
-                }
-                else
-                {
-                    Console.WriteLine(response);
-                    searchMessage = "Error During Matchmaking. Press Cancel";
-                }
-                if (args == null)
-                {
-                    Console.WriteLine(response);
-                    searchMessage = "Error During Matchmaking. Press Cancel";
-                }
-                else
-                {
-                    matchID = int.Parse(args[0]);
-                    seed = int.Parse(args[1]);
-                    mouse = Mouse.GetState();
-                    App.ChangeState(new MainGameState(App, mouse.LeftButton, matchID, seed));
-                }
-            }
-            catch (Exception ex)
+            // Send matchmaking request.
+            byte[] requestBytes = Encoding.UTF8.GetBytes("search");
+            await stream.WriteAsync(requestBytes, 0, requestBytes.Length);
+            Console.WriteLine("Sent matchmaking request.");
+
+            // Wait for the match found response.
+            byte[] buffer = new byte[4096];
+            int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+            if (bytesRead > 0)
             {
-                searchMessage = $"Error: {ex.Message}";
+                string response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                if (response.StartsWith("MATCH_FOUND:"))
+                {
+                    string matchId = response.Substring("MATCH_FOUND:".Length);
+                    Console.WriteLine("Match found! Match ID: " + matchId);
+
+                    App.ChangeState(new MainGameState(App, prevClickState, client, matchID, matchID));
+                }
+                else
+                {
+                    Console.WriteLine("Unexpected response: " + response);
+                }
             }
         }
 
@@ -108,7 +101,7 @@ namespace TetraClashDec24
             searchMessage = "Cancelling...";
             try
             {
-                string response = await Task.Run(() => Client.SendMessageAsync($"cancel:{App.Username}"));
+                string response = await Client.SendMessageAsync($"cancel:{App.Username}");
 
                 if (response == "Success")
                 {

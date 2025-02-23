@@ -3,6 +3,10 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Threading.Tasks;
+using System.IO;
+using System.Net.Sockets;
+using System.Text.Json;
+using System.Text;
 
 namespace TetraClashDec24
 {
@@ -24,7 +28,7 @@ namespace TetraClashDec24
         private GameState gameState;
 
         private int MatchID;
-        private int[,] enemyGrid;
+        private int[][] enemyGrid;
 
         private bool _isBlockTaskRunning;
         private bool _isSendTaskRunning;
@@ -36,11 +40,20 @@ namespace TetraClashDec24
         private KeyboardState prevKeyboardState;
         private ButtonState prevClickState;
 
-        public MainGameState(App app, ButtonState clickState, int matchID, int seed) : base(app)
+        // Store the TcpClient so that its NetworkStream remains valid.
+        private TcpClient _client;
+        private NetworkStream _stream;
+
+        // Modified constructor: accepts TcpClient instead of a NetworkStream.
+        public MainGameState(App app, ButtonState clickState, TcpClient client, int matchID, int seed) : base(app)
         {
             prevClickState = clickState;
 
-            blockTextures = new Texture2D[7];
+            // Keep the client alive for the lifetime of MainGameState.
+            _client = client;
+            _stream = _client.GetStream();
+
+            blockTextures = new Texture2D[8];
 
             gameState = new GameState(seed);
 
@@ -49,19 +62,29 @@ namespace TetraClashDec24
             EnemyGridX = 1920 * 3 / 4 - (gameState.GameGrid.Collumns * tileSize / 2);
             EnemyGridY = PlayerGridY;
 
-            enemyGrid = new int[gameState.GameGrid.Rows, gameState.GameGrid.Collumns];
-
             dropTimer = 0;
             dropRate = 500;
 
             MatchID = matchID;
+
+            enemyGrid = new int[22][];
+            for (int i = 0; i < 22; i++)
+            {
+                enemyGrid[i] = new int[10];
+            }
+
+            // Start a task to continuously send grid updates.
+            _ = Task.Run(() => SendGridUpdatesAsync(_stream));
+
+            // Listen for incoming grid updates from the opponent.
+            _ = Task.Run(() => ListenForGridUpdatesAsync(_stream));
         }
 
         public override void LoadContent()
         {
-            for (int i = 0; i < blockTextures.Length; i++)
+            for (int i = 0; i < blockTextures.Length+1; i++)
             {
-                blockTextures[i] = App.Content.Load<Texture2D>(@$"{i + 1}");
+                blockTextures[i] = App.Content.Load<Texture2D>(@$"{i}");
             }
 
             gridTexture = App.Content.Load<Texture2D>(@"base");
@@ -94,7 +117,6 @@ namespace TetraClashDec24
                     {
                         gameState.MoveBlockLeft();
                     }
-
                     else if (key == Keys.Right)
                     {
                         gameState.MoveBlockRight();
@@ -120,16 +142,6 @@ namespace TetraClashDec24
             {
                 DropBlock();
             }
-
-            if (!_isSendTaskRunning)
-            {
-                sendGrid();
-            }
-
-            if (!_isFetchTaskRunning)
-            {
-                getEnemyGrid();
-            }
         }
 
         public override void Draw(GameTime gameTime)
@@ -137,25 +149,24 @@ namespace TetraClashDec24
             SpriteBatch spriteBatch = new SpriteBatch(App.GraphicsDevice);
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-            spriteBatch.Draw(gridTexture, new Rectangle(PlayerGridX, PlayerGridY, gameState.GameGrid.Collumns * tileSize, gameState.GameGrid.Rows * tileSize), Color.Black);
-            DrawGrid(spriteBatch, gameState.GameGrid, PlayerGridX, PlayerGridY);
-            DrawGrid(spriteBatch, gameState.GameGrid, EnemyGridX, EnemyGridY);
+            DrawGrid(spriteBatch, gameState.GameGrid.grid, PlayerGridX, PlayerGridY);
+            DrawGrid(spriteBatch, enemyGrid, EnemyGridX, EnemyGridY);
             DrawBlock(spriteBatch, gameState.CurrentBlock, PlayerGridX, PlayerGridY);
             DrawGhostBlock(spriteBatch, gameState.CurrentBlock, PlayerGridX, PlayerGridY);
             spriteBatch.End();
         }
 
-        private void DrawGrid(SpriteBatch spriteBatch, GameGrid grid, int x, int y)
+        private void DrawGrid(SpriteBatch spriteBatch, int[][] grid, int x, int y)
         {
-            for (int r = 0; r < grid.Rows; r++)
+            int Rows = grid.Length;
+            int Columns = grid[0].Length; // Assumes at least one row exists.
+
+            for (int r = 0; r < Rows; r++)
             {
-                for (int c = 0; c < grid.Collumns; c++)
+                for (int c = 0; c < Columns; c++)
                 {
-                    int id = grid[r, c];
-                    if (id != 0)
-                    {
-                        spriteBatch.Draw(blockTextures[id - 1], new Rectangle(x + (c * tileSize), y + (r * tileSize), tileSize, tileSize), Color.White);
-                    }
+                    int id = grid[r][c];
+                    spriteBatch.Draw(blockTextures[id], new Rectangle(x + (c * tileSize), y + (r * tileSize), tileSize, tileSize), Color.White);
                 }
             }
         }
@@ -186,33 +197,6 @@ namespace TetraClashDec24
             }
         }
 
-        private async void sendGrid()
-        {
-            _isSendTaskRunning = true;
-
-            try
-            {
-                await Client.SendGridAsync(MatchID, gameState.GameGrid.grid);
-            }
-            finally
-            {
-                _isSendTaskRunning = false;
-            }
-        }
-
-        private async void getEnemyGrid()
-        {
-            _isFetchTaskRunning = true;
-
-            try
-            {
-                enemyGrid = await Client.ReceiveGridAsync();
-            }
-            finally
-            {
-                _isFetchTaskRunning = false;
-            }
-        }
         private void DrawBlock(SpriteBatch spriteBatch, Block block, int x, int y)
         {
             foreach (Position p in block.TilePositions())
@@ -227,7 +211,68 @@ namespace TetraClashDec24
 
             foreach (Position p in block.TilePositions())
             {
-                spriteBatch.Draw(blockTextures[block.Id - 1], new Rectangle(x + (p.Column * tileSize), y + ((p.Row + dropDistance) * tileSize), tileSize, tileSize), new Color(64, 64, 64, 64));
+                spriteBatch.Draw(blockTextures[block.Id], new Rectangle(x + (p.Column * tileSize), y + ((p.Row + dropDistance) * tileSize), tileSize, tileSize), new Color(64, 64, 64, 64));
+            }
+        }
+
+        private async Task SendGridUpdatesAsync(NetworkStream stream)
+        {
+            while (true)
+            {
+                // Serialize the grid to JSON.
+                string gridJson = JsonSerializer.Serialize(gameState.GameGrid.grid);
+                string message = "GRID_UPDATE:" + gridJson;
+                byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+                try
+                {
+                    await stream.WriteAsync(messageBytes, 0, messageBytes.Length);
+                    Console.WriteLine("Sent grid update: " + gridJson);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error sending grid update: " + ex.Message);
+                    break;
+                }
+                await Task.Delay(1000); // Delay before sending the next update.
+            }
+        }
+
+        // Listens for grid updates from the opponent and prints them.
+        private async Task ListenForGridUpdatesAsync(NetworkStream stream)
+        {
+            byte[] buffer = new byte[4096];
+            while (true)
+            {
+                int bytesRead = 0;
+                try
+                {
+                    bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error receiving grid update: " + ex.Message);
+                    break;
+                }
+                if (bytesRead == 0)
+                {
+                    Console.WriteLine("Disconnected from server.");
+                    break;
+                }
+
+                string message = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+                if (message.StartsWith("GRID_UPDATE:"))
+                {
+                    string gridData = message.Substring("GRID_UPDATE:".Length);
+                    try
+                    {
+                        enemyGrid = JsonSerializer.Deserialize<int[][]>(gridData);
+                        Console.WriteLine("Received grid update:");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error deserializing grid data: " + ex.Message);
+                    }
+                }
             }
         }
     }
