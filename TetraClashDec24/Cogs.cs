@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -19,6 +21,8 @@ namespace TetraClashDec24
             new [] { new Vector2(0, 0), new Vector2(-1, 0), new Vector2(0, -1), new Vector2(1, -1) }, // S
             new [] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(0, -1), new Vector2(-1, -1) } // Z
         };
+
+        public static int[] lineClearPoints = { 0, 40, 100, 300, 1200 };
         public static Vector2 centreTextPos(SpriteFont font, string text, int x, int y)
         {
             Vector2 textSize = font.MeasureString(text);

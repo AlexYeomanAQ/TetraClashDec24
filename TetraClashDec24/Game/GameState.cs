@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework.Content;
+using System;
+using System.Web;
 
 namespace TetraClashDec24
 {
     public class GameState
     {
         private Block currentBlock;
-
         public Block CurrentBlock
         {
             get => currentBlock;
@@ -18,12 +19,14 @@ namespace TetraClashDec24
 
         public GameGrid GameGrid { get; }
         public BlockQueue BlockQueue { get; }
+        public int Score { get; private set; }
         public bool GameOver { get; private set; }
 
         public GameState(int seed)
         {
             GameGrid = new GameGrid(22, 10);
             BlockQueue = new BlockQueue(seed);
+            Score = 0;
             CurrentBlock = BlockQueue.GetAndUpdate();
         }
 
@@ -36,7 +39,6 @@ namespace TetraClashDec24
                     return false;
                 }
             }
-
             return true;
         }
 
@@ -92,8 +94,8 @@ namespace TetraClashDec24
                 GameGrid[p.Row, p.Column] = CurrentBlock.Id;
             }
 
-            GameGrid.ClearFullRows();
-
+            int numRowsCleared = GameGrid.ClearFullRows();
+            Score += Cogs.lineClearPoints[numRowsCleared]; // * level+1
             if (IsGameOver())
             {
                 Console.WriteLine("game over");

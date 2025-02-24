@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Threading.Tasks;
 using System.IO;
+using System;
 
 namespace TetraClashDec24
 {
@@ -39,7 +40,7 @@ namespace TetraClashDec24
         private enum InputField { None, Username, Password }
         private InputField focusedField = InputField.None;
 
-        public LoginState(App game, ButtonState clickState, string cache_username) : base(game)
+        public LoginState(App game, ButtonState clickState, string cache_username = "") : base(game)
         {
             prevClickState = clickState;
             username = cache_username;
@@ -97,15 +98,17 @@ namespace TetraClashDec24
                 }
             }
 
+            string input = HandleInput(keyboard, prevKeyboardState, ref isCapsLockOn);
+
             if (focusedField == InputField.Username)
             {
-                username = HandleInput(username, keyboard, prevKeyboardState, ref isCapsLockOn);
+                username = input;
                 usernameBox.Text = username;
                 usernameBox.highlighted = true;
             }
             else if (focusedField == InputField.Password)
             {
-                password = HandleInput(password, keyboard, prevKeyboardState, ref isCapsLockOn, true);
+                password = input;
                 passwordBox.Text = new string('*', password.Length);
                 passwordBox.highlighted = true;
             }
@@ -137,7 +140,7 @@ namespace TetraClashDec24
             submitButton.Draw(spriteBatch);
             createAccountButton.Draw(spriteBatch);
 
-            spriteBatch.DrawString(titleFont, "Login", Cogs.centreTextPos(titleFont, "Create an Account", 960, 475), Color.White);
+            spriteBatch.DrawString(titleFont, "Login", Cogs.centreTextPos(titleFont, "Login", 960, 475), Color.White);
             spriteBatch.Draw(titleTexture, new Rectangle(760, 0, 400, 400), Color.White);
 
             if (ErrorString != "")
@@ -150,8 +153,19 @@ namespace TetraClashDec24
             spriteBatch.End();
         }
 
-        private string HandleInput(string currentText, KeyboardState keyboard, KeyboardState prevKeyboardState, ref bool isCapsLockOn, bool takeSpecialCharacters = false)
+        private string HandleInput(KeyboardState keyboard, KeyboardState prevKeyboardState, ref bool isCapsLockOn)
         {
+            string text = "";
+
+            if (focusedField == InputField.Username)
+            {
+                text = username;
+            }
+            else if (focusedField == InputField.Password)
+            {
+                text = password;
+            }
+
             Keys[] pressedKeys = keyboard.GetPressedKeys();
             bool isShiftPressed = keyboard.IsKeyDown(Keys.LeftShift) || keyboard.IsKeyDown(Keys.RightShift);
 
@@ -160,15 +174,20 @@ namespace TetraClashDec24
                 // Process only if the key was not pressed in the previous state
                 if (prevKeyboardState.IsKeyUp(key))
                 {
-                    if (key == Keys.Back && currentText.Length > 0)
+                    if (key == Keys.Tab)
+                    {
+                        // Handle Tab
+                        text = CycleInputField();
+                    }
+                    else if (key == Keys.Back && text.Length > 0)
                     {
                         // Handle backspace
-                        currentText = currentText.Remove(currentText.Length - 1);
+                        text = text.Remove(text.Length - 1);
                     }
                     else if (key == Keys.Space)
                     {
                         // Handle space
-                        currentText += " ";
+                        text += " ";
                     }
                     else if (key == Keys.CapsLock)
                     {
@@ -187,28 +206,42 @@ namespace TetraClashDec24
                         {
                             letter = char.ToLower(letter);
                         }
-                        currentText += letter;
+                        text += letter;
                     }
                     else if (key >= Keys.D0 && key <= Keys.D9)
                     {
                         // Handle numbers and special characters
-                        if (isShiftPressed && takeSpecialCharacters)
+                        if (isShiftPressed)
                         {
                             string shiftedNumbers = ")!@#$%^&*(";
-                            currentText += shiftedNumbers[key - Keys.D0];
+                            text += shiftedNumbers[key - Keys.D0];
                         }
                         else
                         {
-                            currentText += (char)('0' + (key - Keys.D0));
+                            text += (char)('0' + (key - Keys.D0));
                         }
                     }
                     else if (key == Keys.Enter)
                     {
-
+                        LoginAsync();
                     }
                 }
             }
-            return currentText;
+            return text;
+        }
+
+        private string CycleInputField()
+        {
+            focusedField = (InputField)(((int)focusedField + 1) % Enum.GetValues(typeof(InputField)).Length);
+            if (focusedField == InputField.Username)
+            {
+                return username;
+            }
+            else if (focusedField == InputField.Password)
+            {
+                return password;
+            }
+            return "";
         }
 
         private async void LoginAsync()
@@ -228,7 +261,7 @@ namespace TetraClashDec24
             {
                 string hash = Security.GenerateHash(password, salt);
                 string message = $"login{username}:{hash}";
-                string response = await Task.Run(() => Client.SendMessageAsync(message));
+                string response = await Client.SendMessageAsync(message);
                 if (response == "Success")
                 {
                     App.Username = username;
