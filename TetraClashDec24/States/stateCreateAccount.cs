@@ -17,9 +17,6 @@ namespace TetraClashDec24
         private Button loginButton;
         private Texture2D titleTexture;
 
-        private SpriteFont font;
-        private SpriteFont titleFont;
-
         private string ErrorString = "";
         private string UBDefaultString = "Enter Username";
         private string PBDefaultString = "Enter Password";
@@ -59,9 +56,6 @@ namespace TetraClashDec24
             loginButton.LoadContent(App.Content);
 
             titleTexture = App.Content.Load<Texture2D>(@"tempLogo");
-
-            font = App.Content.Load<SpriteFont>(@"myFont");
-            titleFont = App.Content.Load<SpriteFont>(@"titleFont");
         }
 
 
@@ -134,7 +128,7 @@ namespace TetraClashDec24
             SpriteBatch spriteBatch = new SpriteBatch(App.GraphicsDevice);
             spriteBatch.Begin();
 
-            spriteBatch.DrawString(titleFont, "Create an Account", Cogs.centreTextPos(titleFont, "Create an Account", 960, 475), Color.White);
+            spriteBatch.DrawString(App.titleFont, "Create an Account", Cogs.centreTextPos(App.titleFont, "Create an Account", 960, 475), Color.White);
 
             spriteBatch.Draw(titleTexture, new Rectangle(760, 0, 400, 400), Color.White);
 
@@ -145,8 +139,8 @@ namespace TetraClashDec24
 
             if (ErrorString != "")
             {
-                Vector2 textPos = Cogs.centreTextPos(font, ErrorString, 960, 1000);
-                spriteBatch.DrawString(font, ErrorString, textPos, Color.Red);
+                Vector2 textPos = Cogs.centreTextPos(App.font, ErrorString, 960, 1000);
+                spriteBatch.DrawString(App.font, ErrorString, textPos, Color.Red);
             }
 
             spriteBatch.End();

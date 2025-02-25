@@ -13,6 +13,8 @@ namespace TetraClashDec24
 
         private AppState _currentState;
 
+        public SpriteFont font;
+        public SpriteFont titleFont;
         private Texture2D _background;
 
         public string Username;
@@ -49,6 +51,8 @@ namespace TetraClashDec24
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            font = Content.Load<SpriteFont>(@"myFont");
+            titleFont = Content.Load<SpriteFont>(@"titleFont");
             _background = Content.Load<Texture2D>(@"background");
             _currentState.LoadContent();
         }

@@ -11,12 +11,11 @@ namespace TetraClashDec24
 {
     class SearchState : AppState
     {
-        private SpriteFont SearchFont;
         private Button CancelButton;
 
         private bool isFound;
         private string searchMessage = "";
-        int seed;
+        private int seed;
         private int matchID;
 
         private MouseState mouse;
@@ -31,8 +30,6 @@ namespace TetraClashDec24
         {
             CancelButton = new Button(@"base", 860, 710, 200, 100, Color.White, "Cancel");
             CancelButton.LoadContent(App.Content);
-
-            SearchFont = App.Content.Load<SpriteFont>(@"titleFont");
         }
 
         public override void Update(GameTime gameTime)
@@ -55,10 +52,10 @@ namespace TetraClashDec24
         {
             SpriteBatch spriteBatch = new SpriteBatch(App.GraphicsDevice);
             spriteBatch.Begin();
-            Vector2 textSize = SearchFont.MeasureString(searchMessage);
+            Vector2 textSize = App.titleFont.MeasureString(searchMessage);
             float textX = 1920 / 2 - textSize.X / 2;
             float textY = 1080 / 2 - textSize.Y / 2;
-            spriteBatch.DrawString(SearchFont, searchMessage, new Vector2(textX, textY), Color.Black);
+            spriteBatch.DrawString(App.titleFont, searchMessage, new Vector2(textX, textY), Color.Black);
             CancelButton.Draw(spriteBatch);
             spriteBatch.End();
         }
