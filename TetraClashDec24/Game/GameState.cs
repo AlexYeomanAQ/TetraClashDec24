@@ -98,7 +98,6 @@ namespace TetraClashDec24
             Score += Cogs.lineClearPoints[numRowsCleared]; // * level+1
             if (IsGameOver())
             {
-                Console.WriteLine("game over");
                 GameOver = true;
             }
             else

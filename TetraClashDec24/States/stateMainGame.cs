@@ -138,6 +138,11 @@ namespace TetraClashDec24
 
             fastDrop = fastSwitch;
 
+            if (gameState.GameOver)
+            {
+                HandleGameOver(_stream);
+            }
+
             if (!_isBlockTaskRunning)
             {
                 DropBlock();
@@ -201,7 +206,10 @@ namespace TetraClashDec24
         {
             foreach (Position p in block.TilePositions())
             {
-                spriteBatch.Draw(blockTextures[block.Id - 1], new Rectangle(x + (p.Column * tileSize), y + (p.Row * tileSize), tileSize, tileSize), Color.White);
+                if (p.Row > 2)
+                {
+                    spriteBatch.Draw(blockTextures[block.Id - 1], new Rectangle(x + (p.Column * tileSize), y + (p.Row * tileSize), tileSize, tileSize), Color.White);
+                }
             }
         }
 
@@ -215,6 +223,21 @@ namespace TetraClashDec24
             }
         }
 
+        private async void HandleGameOver(SpriteBatch spriteBatch)
+        {
+            string message = "GAME_OVER";
+            string response = "";
+            try
+            {
+                response = await Client.SendMessageAsync(message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error sending update: " + ex.Message);
+                return;
+            }
+            spriteBatch.Draw(gridTexture, new Rectangle(0, 0, 1920, 1080), new Color(64, 64, 64, 64));
+        }
         private async Task SendGridUpdatesAsync(NetworkStream stream)
         {
             while (true)
@@ -233,7 +256,7 @@ namespace TetraClashDec24
                     Console.WriteLine("Error sending grid update: " + ex.Message);
                     break;
                 }
-                await Task.Delay(1000); // Delay before sending the next update.
+                await Task.Delay(200); // Delay before sending the next update.
             }
         }
 

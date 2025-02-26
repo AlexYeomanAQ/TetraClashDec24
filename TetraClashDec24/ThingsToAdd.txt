@@ -1,1 +1,2 @@
 ﻿- For Async Buttons, add "activated" function to prevent the same request being submitted twice.
+- Game 
