@@ -16,8 +16,7 @@ namespace TetraClashDec24
 
         public override void LoadContent()
         {
-            TestButton = new Button(@"base", 500, 500, 500, 500, Color.White, "skibidi!");
-            TestButton.LoadContent(App.Content);
+            TestButton = new Button(App, 500, 500, 500, 500, Color.White, "skibidi!");
         }
 
         public override void Update(GameTime gameTime)

@@ -16,8 +16,7 @@ namespace TetraClashDec24
 
         public override void LoadContent()
         {
-            PlayButton = new Button(@"base", 880, 340, 200, 200, Color.White, "Play");
-            PlayButton.LoadContent(App.Content);
+            PlayButton = new Button(App, 880, 340, 200, 200, Color.White, "Play");
         }
 
         public override void Update(GameTime gameTime)

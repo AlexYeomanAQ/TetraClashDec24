@@ -19,8 +19,7 @@ namespace TetraClashDec24
         public int TotalLinesCleared;
         public int Level;
         public int Score;
-        public GameGrid GameGrid { get; }
-        public BlockQueue BlockQueue { get; }
+        public GameGrid GameGrid { get; }        public BlockQueue BlockQueue { get; }
         public bool GameOver { get; private set; }
 
         public GameState(int seed)

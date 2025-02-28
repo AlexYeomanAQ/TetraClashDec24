@@ -13,9 +13,7 @@ namespace TetraClashDec24
     {
         private Button CancelButton;
 
-        private bool isFound;
         private string searchMessage = "";
-        private int seed;
         private int matchID;
 
         private MouseState mouse;
@@ -28,8 +26,7 @@ namespace TetraClashDec24
 
         public override void LoadContent()
         {
-            CancelButton = new Button(@"base", 860, 710, 200, 100, Color.White, "Cancel");
-            CancelButton.LoadContent(App.Content);
+            CancelButton = new Button(App, 860, 710, 200, 100, Color.White, "Cancel");
         }
 
         public override void Update(GameTime gameTime)

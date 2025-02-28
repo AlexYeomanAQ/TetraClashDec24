@@ -31,6 +31,9 @@ namespace TetraClashDec24
         private int[][] enemyGrid;
         private string enemyLevel = "0";
         private string enemyScore = "0";
+        private string MatchResult = "";
+
+        private Button returnToMenu_Button;
 
         private bool _isBlockTaskRunning = false;
 
@@ -73,6 +76,8 @@ namespace TetraClashDec24
                 enemyGrid[i] = new int[10];
             }
 
+            returnToMenu_Button = new Button(App, 860, 490, 200, 100, Color.White, "Return to Menu");
+
             // Start a task to continuously send grid updates.
             _ = Task.Run(() => SendGridUpdatesAsync(_stream));
 
@@ -87,7 +92,6 @@ namespace TetraClashDec24
                 blockTextures[i] = App.Content.Load<Texture2D>(@$"{i}");
             }
 
-            gridTexture = App.Content.Load<Texture2D>(@"base");
         }
 
         public override void Update(GameTime gameTime)
@@ -96,51 +100,57 @@ namespace TetraClashDec24
             mouse = Mouse.GetState();
             keyboard = Keyboard.GetState();
 
-            Keys[] pressedKeys = keyboard.GetPressedKeys();
-
-            bool fastSwitch = false;
-
-            foreach (Keys key in pressedKeys)
+            if (MatchResult == "")
             {
-                if (key == Keys.Down)
+                Keys[] pressedKeys = keyboard.GetPressedKeys();
+
+                bool fastSwitch = false;
+
+                foreach (Keys key in pressedKeys)
                 {
-                    fastSwitch = true;
-                }
-                else if (key != Keys.Down && !fastSwitch)
-                {
-                    fastSwitch = false;
+                    if (key == Keys.Down)
+                    {
+                        fastSwitch = true;
+                    }
+                    else if (key != Keys.Down && !fastSwitch)
+                    {
+                        fastSwitch = false;
+                    }
+
+                    if (prevKeyboardState.IsKeyUp(key))
+                    {
+                        if (key == Keys.Left)
+                        {
+                            gameState.MoveBlockLeft();
+                        }
+                        else if (key == Keys.Right)
+                        {
+                            gameState.MoveBlockRight();
+                        }
+                        else if (key == Keys.Up)
+                        {
+                            gameState.DropBlock();
+                        }
+                        else if (key == Keys.Z)
+                        {
+                            gameState.RotateBlockCCW();
+                        }
+                        else if (key == Keys.X)
+                        {
+                            gameState.RotateBlockCW();
+                        }
+                    }
                 }
 
-                if (prevKeyboardState.IsKeyUp(key))
+                fastDrop = fastSwitch;
+
+                if (!_isBlockTaskRunning)
                 {
-                    if (key == Keys.Left)
-                    {
-                        gameState.MoveBlockLeft();
-                    }
-                    else if (key == Keys.Right)
-                    {
-                        gameState.MoveBlockRight();
-                    }
-                    else if (key == Keys.Up)
-                    {
-                        gameState.DropBlock();
-                    }
-                    else if (key == Keys.Z)
-                    {
-                        gameState.RotateBlockCCW();
-                    }
-                    else if (key == Keys.X)
-                    {
-                        gameState.RotateBlockCW();
-                    }
+                    DropBlock();
                 }
             }
-
-            fastDrop = fastSwitch;
-
-            if (!_isBlockTaskRunning)
+            else
             {
-                DropBlock();
             }
         }
 
@@ -163,6 +173,12 @@ namespace TetraClashDec24
             spriteBatch.DrawString(App.titleFont, enemyLevel, Cogs.centreTextPos(App.font, enemyLevel, 1650, 580), Color.White);
             spriteBatch.DrawString(App.titleFont, "Score", Cogs.centreTextPos(App.titleFont, "Score", 1650, 640), Color.White);
             spriteBatch.DrawString(App.titleFont, enemyScore, Cogs.centreTextPos(App.font, enemyScore, 1650, 700), Color.White);
+            if (MatchResult != "")
+            {
+                spriteBatch.Draw(App.baseTexture, new Rectangle(0, 0, 1920, 1080), new Color(64, 64, 64, 64));
+                spriteBatch.DrawString(App.titleFont, MatchResult, Cogs.centreTextPos(App.titleFont, MatchResult, 960, 540), Color.White);
+                returnToMenu_Button.Draw(spriteBatch);
+            }
             spriteBatch.End();
         }
 
@@ -224,6 +240,13 @@ namespace TetraClashDec24
             {
                 spriteBatch.Draw(blockTextures[block.Id], new Rectangle(x + (p.Column * tileSize), y + ((p.Row + dropDistance) * tileSize), tileSize, tileSize), new Color(64, 64, 64, 64));
             }
+        }
+
+        private async Task HandleGameOver()
+        {
+            MatchResult = "You lose!";
+            string message = $"lose";
+            await Client.SendMessageAsync(message);
         }
 
         private async Task SendGridUpdatesAsync(NetworkStream stream)

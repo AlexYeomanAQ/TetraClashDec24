@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using SharpDX.Direct3D9;
 using System;
 using System.IO;
 
@@ -15,6 +16,7 @@ namespace TetraClashDec24
 
         public SpriteFont font;
         public SpriteFont titleFont;
+        public Texture2D baseTexture;
         private Texture2D _background;
 
         public string Username;
@@ -53,6 +55,7 @@ namespace TetraClashDec24
             spriteBatch = new SpriteBatch(GraphicsDevice);
             font = Content.Load<SpriteFont>(@"myFont");
             titleFont = Content.Load<SpriteFont>(@"titleFont");
+            baseTexture = Content.Load<Texture2D>(@"base");
             _background = Content.Load<Texture2D>(@"background");
             _currentState.LoadContent();
         }

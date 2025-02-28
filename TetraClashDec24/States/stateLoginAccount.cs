@@ -9,6 +9,7 @@ namespace TetraClashDec24
 {
     public class LoginState : AppState
     {
+        App App;
 
         private InputButton usernameBox;
         private InputButton passwordBox;
@@ -25,8 +26,6 @@ namespace TetraClashDec24
         private string username = "";
         private string password = "";
 
-        private string basePath = @"base";
-
         private KeyboardState keyboard;
         private MouseState mouse;
 
@@ -37,25 +36,22 @@ namespace TetraClashDec24
         private enum InputField { None, Username, Password }
         private InputField focusedField = InputField.None;
 
-        public LoginState(App game, ButtonState clickState, string cache_username = "") : base(game)
+        public LoginState(App app, ButtonState clickState, string cache_username = "") : base(app)
         {
+            App = app;
             prevClickState = clickState;
             username = cache_username;
         }
 
         public override void LoadContent()
         {
-            usernameBox = new InputButton(basePath, 835, 600, 250, 50, Color.White, username);
-            usernameBox.LoadContent(App.Content);
+            usernameBox = new InputButton(App, 835, 600, 250, 50, Color.White, username);
 
-            passwordBox = new InputButton(basePath, 835, 675, 250, 50, Color.White, PBDefaultString);
-            passwordBox.LoadContent(App.Content);
+            passwordBox = new InputButton(App, 835, 675, 250, 50, Color.White, PBDefaultString);
 
-            submitButton = new Button(basePath, 885, 750, 150, 100, Color.White, "Submit!");
-            submitButton.LoadContent(App.Content);
+            submitButton = new Button(App, 885, 750, 150, 100, Color.White, "Submit!");
 
-            createAccountButton = new Button(basePath, 885, 875, 150, 100, Color.White, "Create new account");
-            createAccountButton.LoadContent(App.Content);
+            createAccountButton = new Button(App, 885, 875, 150, 100, Color.White, "Create new account");
 
             titleTexture = App.Content.Load<Texture2D>(@"tempLogo");
         }

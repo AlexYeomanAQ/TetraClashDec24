@@ -4,42 +4,31 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace TetraClashDec24
 {
-    class Button : Object
+    class Button
     {
+        public App App;
         public Rectangle Box;
-        public string TexturePath;
         public Color Colour;
         public string Text;
 
-        public Button(string filePath, int x, int y, int width, int height, Color colour, string text = "")
+        public Button(App app, int x, int y, int width, int height, Color colour, string text = "")
         {
+            App = app;
             Box = new Rectangle(x, y, width, height);
-            TexturePath = filePath;
             Colour = colour;
             Text = text;
         }
 
-
-        public override void LoadContent(ContentManager Content)
+        public void Draw(SpriteBatch spriteBatch)
         {
-            baseTexture = Content.Load<Texture2D>(@"base");
-            baseFont = Content.Load<SpriteFont>(@"myFont");
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-        }
-
-        public override void Draw(SpriteBatch spriteBatch)
-        {
-            spriteBatch.Draw(baseTexture, Box, Colour);
+            spriteBatch.Draw(App.baseTexture, Box, Colour);
 
             if (Text != "")
             {
-                Vector2 textSize = baseFont.MeasureString(Text);
+                Vector2 textSize = App.font.MeasureString(Text);
                 float textX = Box.X + (Box.Width / 2) - (textSize.X / 2);
                 float textY = Box.Y + (Box.Height / 2) - (textSize.Y / 2);
-                spriteBatch.DrawString(baseFont, Text, new Vector2(textX, textY), Color.Black);
+                spriteBatch.DrawString(App.font, Text, new Vector2(textX, textY), Color.Black);
             }
         }
     }
@@ -48,37 +37,27 @@ namespace TetraClashDec24
     {
         public bool highlighted = false;
 
-        public InputButton(string filePath, int x, int y, int width, int height, Color colour, string text = "") : base(filePath, x, y, width, height, Color.White)
+        public InputButton(App app, int x, int y, int width, int height, Color colour, string text = "") : base(app, x, y, width, height, Color.White)
         {
+            App = app;
             Box = new Rectangle(x, y, width, height);
-            TexturePath = filePath;
             Colour = colour;
             Text = text;
         }
 
-        public override void LoadContent(ContentManager Content)
-        {
-            baseTexture = Content.Load<Texture2D>(TexturePath);
-            baseFont = Content.Load<SpriteFont>(@"myFont");
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-        }
-
-        public override void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch)
         {
             if (highlighted)
-                spriteBatch.Draw(baseTexture, Box, Color.LightBlue);
+                spriteBatch.Draw(App.baseTexture, Box, Color.LightBlue);
             else
-                spriteBatch.Draw(baseTexture, Box, Color.White);
+                spriteBatch.Draw(App.baseTexture, Box, Color.White);
 
             if (Text != "" && Text != null)
             {
-                Vector2 textSize = baseFont.MeasureString(Text);
+                Vector2 textSize = App.font.MeasureString(Text);
                 float textX = Box.X + (Box.Width / 2) - (textSize.X / 2);
                 float textY = Box.Y + (Box.Height / 2) - (textSize.Y / 2);
-                spriteBatch.DrawString(baseFont, Text, new Vector2(textX, textY), Color.Black);
+                spriteBatch.DrawString(App.font, Text, new Vector2(textX, textY), Color.Black);
             }
         }
     }

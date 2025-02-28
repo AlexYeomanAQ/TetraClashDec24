@@ -24,8 +24,6 @@ namespace TetraClashDec24
         private string username = "";
         private string password = "";
 
-        private string basePath = @"base";
-
         private KeyboardState keyboard;
         private MouseState mouse;
 
@@ -43,17 +41,13 @@ namespace TetraClashDec24
 
         public override void LoadContent()
         {
-            usernameBox = new InputButton(basePath, 835, 600, 250, 50, Color.White, UBDefaultString);
-            usernameBox.LoadContent(App.Content);
+            usernameBox = new InputButton(App, 835, 600, 250, 50, Color.White, UBDefaultString);
 
-            passwordBox = new InputButton(basePath, 835, 675, 250, 50, Color.White, PBDefaultString);
-            passwordBox.LoadContent(App.Content);
+            passwordBox = new InputButton(App, 835, 675, 250, 50, Color.White, PBDefaultString);
 
-            submitButton = new Button(basePath, 885, 750, 150, 100, Color.White, "Submit!");
-            submitButton.LoadContent(App.Content);
+            submitButton = new Button(App, 885, 750, 150, 100, Color.White, "Submit!");
 
-            loginButton = new Button(basePath, 885, 875, 150, 100, Color.White, "Login");
-            loginButton.LoadContent(App.Content);
+            loginButton = new Button(App, 885, 875, 150, 100, Color.White, "Login");
 
             titleTexture = App.Content.Load<Texture2D>(@"tempLogo");
         }
