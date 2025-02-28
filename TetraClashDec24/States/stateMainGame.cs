@@ -29,10 +29,10 @@ namespace TetraClashDec24
 
         private int MatchID;
         private int[][] enemyGrid;
+        private string enemyLevel = "0";
+        private string enemyScore = "0";
 
-        private bool _isBlockTaskRunning;
-        private bool _isSendTaskRunning;
-        private bool _isFetchTaskRunning;
+        private bool _isBlockTaskRunning = false;
 
         private KeyboardState keyboard;
         private MouseState mouse;
@@ -63,7 +63,7 @@ namespace TetraClashDec24
             EnemyGridY = PlayerGridY;
 
             dropTimer = 0;
-            dropRate = 500;
+            dropRate = Cogs.getDropRate(gameState.Level);
 
             MatchID = matchID;
 
@@ -138,11 +138,6 @@ namespace TetraClashDec24
 
             fastDrop = fastSwitch;
 
-            if (gameState.GameOver)
-            {
-                HandleGameOver(_stream);
-            }
-
             if (!_isBlockTaskRunning)
             {
                 DropBlock();
@@ -158,6 +153,16 @@ namespace TetraClashDec24
             DrawGrid(spriteBatch, enemyGrid, EnemyGridX, EnemyGridY);
             DrawBlock(spriteBatch, gameState.CurrentBlock, PlayerGridX, PlayerGridY);
             DrawGhostBlock(spriteBatch, gameState.CurrentBlock, PlayerGridX, PlayerGridY);
+            spriteBatch.DrawString(App.titleFont, "Level", Cogs.centreTextPos(App.titleFont, "Level", 960, 520), Color.White);
+            spriteBatch.DrawString(App.titleFont, gameState.Level.ToString(), Cogs.centreTextPos(App.font, gameState.Level.ToString(), 960, 580), Color.White);
+            spriteBatch.DrawString(App.titleFont, "Lines Cleared", Cogs.centreTextPos(App.titleFont, "Lines Cleared", 960, 640), Color.White);
+            spriteBatch.DrawString(App.titleFont, gameState.TotalLinesCleared.ToString(), Cogs.centreTextPos(App.font, gameState.TotalLinesCleared.ToString(), 960, 700), Color.White);
+            spriteBatch.DrawString(App.titleFont, "Score", Cogs.centreTextPos(App.titleFont, "Score", 960, 760), Color.White);
+            spriteBatch.DrawString(App.titleFont, gameState.Score.ToString(), Cogs.centreTextPos(App.font, gameState.Score.ToString(), 960, 820), Color.White);
+            spriteBatch.DrawString(App.titleFont, "Level", Cogs.centreTextPos(App.titleFont, "Level", 1650, 520), Color.White);
+            spriteBatch.DrawString(App.titleFont, enemyLevel, Cogs.centreTextPos(App.font, enemyLevel, 1650, 580), Color.White);
+            spriteBatch.DrawString(App.titleFont, "Score", Cogs.centreTextPos(App.titleFont, "Score", 1650, 640), Color.White);
+            spriteBatch.DrawString(App.titleFont, enemyScore, Cogs.centreTextPos(App.font, enemyScore, 1650, 700), Color.White);
             spriteBatch.End();
         }
 
@@ -166,7 +171,7 @@ namespace TetraClashDec24
             int Rows = grid.Length;
             int Columns = grid[0].Length; // Assumes at least one row exists.
 
-            for (int r = 0; r < Rows; r++)
+            for (int r = 2; r < Rows; r++)
             {
                 for (int c = 0; c < Columns; c++)
                 {
@@ -184,9 +189,10 @@ namespace TetraClashDec24
             {
                 while (!gameState.GameOver)
                 {
+                    dropRate = Cogs.getDropRate(gameState.Level);
                     if (fastDrop)
                     {
-                        await Task.Delay(dropRate / 10);
+                        await Task.Delay(dropRate / 2);
                     }
                     else
                     {
@@ -206,10 +212,7 @@ namespace TetraClashDec24
         {
             foreach (Position p in block.TilePositions())
             {
-                if (p.Row > 2)
-                {
-                    spriteBatch.Draw(blockTextures[block.Id - 1], new Rectangle(x + (p.Column * tileSize), y + (p.Row * tileSize), tileSize, tileSize), Color.White);
-                }
+                spriteBatch.Draw(blockTextures[block.Id], new Rectangle(x + (p.Column * tileSize), y + (p.Row * tileSize), tileSize, tileSize), Color.White);
             }
         }
 
@@ -223,40 +226,26 @@ namespace TetraClashDec24
             }
         }
 
-        private async void HandleGameOver(SpriteBatch spriteBatch)
-        {
-            string message = "GAME_OVER";
-            string response = "";
-            try
-            {
-                response = await Client.SendMessageAsync(message);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error sending update: " + ex.Message);
-                return;
-            }
-            spriteBatch.Draw(gridTexture, new Rectangle(0, 0, 1920, 1080), new Color(64, 64, 64, 64));
-        }
         private async Task SendGridUpdatesAsync(NetworkStream stream)
         {
             while (true)
             {
-                // Serialize the grid to JSON.
+                //GameState tempGameState = gameState;
+                //tempGameState.PlaceBlock();
                 string gridJson = JsonSerializer.Serialize(gameState.GameGrid.grid);
-                string message = "GRID_UPDATE:" + gridJson;
+                string message = $"match:{gridJson}:{gameState.Level}:{gameState.Score}";
                 byte[] messageBytes = Encoding.UTF8.GetBytes(message);
                 try
                 {
                     await stream.WriteAsync(messageBytes, 0, messageBytes.Length);
-                    Console.WriteLine("Sent grid update: " + gridJson);
+                    Console.WriteLine("Sent grid update");
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine("Error sending grid update: " + ex.Message);
                     break;
                 }
-                await Task.Delay(200); // Delay before sending the next update.
+                await Task.Delay(dropRate); // Delay before sending the next update.
             }
         }
 
@@ -285,11 +274,13 @@ namespace TetraClashDec24
                 string message = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
                 if (message.StartsWith("GRID_UPDATE:"))
                 {
-                    string gridData = message.Substring("GRID_UPDATE:".Length);
+                    string[] args = message.Substring("GRID_UPDATE:".Length).Split(':');
                     try
                     {
-                        enemyGrid = JsonSerializer.Deserialize<int[][]>(gridData);
-                        Console.WriteLine("Received grid update:");
+                        enemyGrid = JsonSerializer.Deserialize<int[][]>(args[0]);
+                        enemyLevel = args[1];
+                        enemyScore = args[2];
+                        Console.WriteLine("Received match update.");
                     }
                     catch (Exception ex)
                     {

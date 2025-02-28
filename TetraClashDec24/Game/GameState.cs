@@ -16,16 +16,19 @@ namespace TetraClashDec24
                 currentBlock.Reset();
             }
         }
-
+        public int TotalLinesCleared;
+        public int Level;
+        public int Score;
         public GameGrid GameGrid { get; }
         public BlockQueue BlockQueue { get; }
-        public int Score { get; private set; }
         public bool GameOver { get; private set; }
 
         public GameState(int seed)
         {
             GameGrid = new GameGrid(22, 10);
             BlockQueue = new BlockQueue(seed);
+            TotalLinesCleared = 0;
+            Level = 0;
             Score = 0;
             CurrentBlock = BlockQueue.GetAndUpdate();
         }
@@ -87,7 +90,7 @@ namespace TetraClashDec24
             return !(GameGrid.IsRowEmpty(0) && GameGrid.IsRowEmpty(1));
         }
 
-        private void PlaceBlock()
+        public void PlaceBlock()
         {
             foreach (Position p in CurrentBlock.TilePositions())
             {
@@ -95,7 +98,15 @@ namespace TetraClashDec24
             }
 
             int numRowsCleared = GameGrid.ClearFullRows();
-            Score += Cogs.lineClearPoints[numRowsCleared]; // * level+1
+            Score += Cogs.lineClearPoints[numRowsCleared]*(Level+1);
+            for (int i = 0; i < numRowsCleared; i++)
+            {
+                TotalLinesCleared++;
+                if (TotalLinesCleared %10 == 0)
+                {
+                    Level++;
+                }
+            }
             if (IsGameOver())
             {
                 GameOver = true;

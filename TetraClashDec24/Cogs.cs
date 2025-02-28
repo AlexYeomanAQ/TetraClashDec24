@@ -31,6 +31,33 @@ namespace TetraClashDec24
             return new Vector2((int)textX, (int)textY);
         }
 
+        public static int getDropRate(int level)
+        {
+            {
+                int frames = level switch
+                {
+                    0 => 48,
+                    1 => 43,
+                    2 => 38,
+                    3 => 33,
+                    4 => 28,
+                    5 => 23,
+                    6 => 18,
+                    7 => 13,
+                    8 => 8,
+                    9 => 6,
+                    >= 10 and <= 12 => 5,
+                    >= 13 and <= 15 => 4,
+                    >= 16 and <= 18 => 3,
+                    >= 19 and <= 28 => 2,
+                    _ => 1, // Level 29 and above
+                };
+
+                // Convert frames to milliseconds (60 FPS means each frame is ~16.67 ms)
+                int millisecondsPerFrame = (int) (1000 / 60);
+                return frames * millisecondsPerFrame;
+            }
+        }
         public static async Task saveCache(string username, string salt)
         {
             await File.WriteAllTextAsync("cache.txt", $"{username}\n{salt}");

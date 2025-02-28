@@ -18,9 +18,6 @@ namespace TetraClashDec24
 
         private Texture2D titleTexture;
 
-        private SpriteFont font;
-        private SpriteFont titleFont;
-
         private string ErrorString = "";
         private string UBDefaultString = "Enter Username";
         private string PBDefaultString = "Enter Password";
@@ -61,9 +58,6 @@ namespace TetraClashDec24
             createAccountButton.LoadContent(App.Content);
 
             titleTexture = App.Content.Load<Texture2D>(@"tempLogo");
-
-            font = App.Content.Load<SpriteFont>(@"myFont");
-            titleFont = App.Content.Load<SpriteFont>(@"titleFont");
         }
 
 
@@ -140,15 +134,15 @@ namespace TetraClashDec24
             submitButton.Draw(spriteBatch);
             createAccountButton.Draw(spriteBatch);
 
-            spriteBatch.DrawString(titleFont, "Login", Cogs.centreTextPos(titleFont, "Login", 960, 475), Color.White);
+            spriteBatch.DrawString(App.titleFont, "Login", Cogs.centreTextPos(App.titleFont, "Login", 960, 475), Color.White);
             spriteBatch.Draw(titleTexture, new Rectangle(760, 0, 400, 400), Color.White);
 
             if (ErrorString != "")
             {
-                Vector2 textSize = font.MeasureString(ErrorString);
+                Vector2 textSize = App.font.MeasureString(ErrorString);
                 float textX = 700 - textSize.X / 2;
                 float textY = 700 - textSize.Y / 2;
-                spriteBatch.DrawString(font, ErrorString, new Vector2(textX, textY), Color.Red);
+                spriteBatch.DrawString(App.font, ErrorString, new Vector2(textX, textY), Color.Red);
             }
             spriteBatch.End();
         }
