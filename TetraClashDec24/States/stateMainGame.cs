@@ -144,14 +144,23 @@ namespace TetraClashDec24
 
                 fastDrop = fastSwitch;
 
-                if (!_isBlockTaskRunning)
+                if (!_isBlockTaskRunning && MatchResult != "")
                 {
                     DropBlock();
                 }
             }
             else
             {
+                if (mouse.LeftButton == ButtonState.Pressed && prevClickState != mouse.LeftButton)
+                {
+                    Point mousePosition = new Point(mouse.X, mouse.Y);
+                    if (returnToMenu_Button.Box.Contains(mousePosition))
+                    {
+                        App.ChangeState(new MainMenuState(App, mouse.LeftButton));
+                    }
+                }
             }
+            prevClickState = mouse.LeftButton;
         }
 
         public override void Draw(GameTime gameTime)
@@ -309,6 +318,10 @@ namespace TetraClashDec24
                     {
                         Console.WriteLine("Error deserializing grid data: " + ex.Message);
                     }
+                }
+                else if (message.StartsWith("MATCH_WIN"))
+                {
+                    MatchResult = "You win!";
                 }
             }
         }
