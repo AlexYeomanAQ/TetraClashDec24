@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework.Graphics;
 using System.Threading.Tasks;
 using System.IO;
 using System;
+using SharpDX.Win32;
+using System.Net.Sockets;
 
 namespace TetraClashDec24
 {
@@ -19,7 +21,7 @@ namespace TetraClashDec24
 
         private Texture2D titleTexture;
 
-        private string ErrorString = "";
+        private string ErrorString;
         private string UBDefaultString = "Enter Username";
         private string PBDefaultString = "Enter Password";
 
@@ -36,11 +38,12 @@ namespace TetraClashDec24
         private enum InputField { None, Username, Password }
         private InputField focusedField = InputField.None;
 
-        public LoginState(App app, ButtonState clickState, string cache_username = "") : base(app)
+        public LoginState(App app, ButtonState clickState, string cache_username = "", string error_string = "") : base(app)
         {
             App = app;
             prevClickState = clickState;
             username = cache_username;
+            ErrorString = error_string;
         }
 
         public override void LoadContent()
@@ -236,6 +239,8 @@ namespace TetraClashDec24
 
         private async void LoginAsync()
         {
+            App._client = new TcpClient("localhost", 5000);
+            App._stream = App._client.GetStream();
             string salt = await FetchSalt();
             if (salt == "Username")
             {
@@ -251,7 +256,7 @@ namespace TetraClashDec24
             {
                 string hash = Security.GenerateHash(password, salt);
                 string message = $"login{username}:{hash}";
-                string response = await Client.SendMessageAsync(message);
+                string response = await Client.SendMessageAsync(App._stream, message);
                 if (response == "Success")
                 {
                     App.Username = username;
@@ -277,7 +282,7 @@ namespace TetraClashDec24
             }
             else
             {
-                return await Task.Run(() => Client.SendMessageAsync($"salt{username}"));
+                return await Task.Run(() => Client.SendMessageAsync(App._stream, $"salt{username}"));
             }
         }
     }

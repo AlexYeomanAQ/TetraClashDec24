@@ -19,19 +19,19 @@ namespace TetraClashDec24
             new ZBlock(),
         };
 
-        private Random random;
+        private LCGGenerator LCGGen;
 
         public Block NextBlock { get; private set; }
 
         public BlockQueue(int seed)
         {
-            random = new Random(seed);
+            LCGGen = new LCGGenerator(seed);
             NextBlock = RandomBlock();
         }
 
         public Block RandomBlock()
         {
-            return blocks[random.Next(blocks.Length)];
+            return blocks[LCGGen.NextTetrominoValue()];
         }
 
         public Block GetAndUpdate()
@@ -42,7 +42,7 @@ namespace TetraClashDec24
             {
                 NextBlock = RandomBlock();
             }
-            while (block.Id == NextBlock.Id);
+            while (block.TetrominoID == NextBlock.TetrominoID);
 
             return block;
         }

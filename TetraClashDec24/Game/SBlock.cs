@@ -14,7 +14,7 @@ namespace TetraClashDec24
             new Position[] { new (0,1), new (1,1), new (1,2), new (2,2) }
         };
 
-        public override int Id => 5;
+        public override int TetrominoID => 5;
 
         protected override Position StartOffset => new Position(0, 3);
 

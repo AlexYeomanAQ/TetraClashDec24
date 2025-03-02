@@ -10,7 +10,7 @@ namespace TetraClashDec24
     {
         protected abstract Position[][] Tiles { get; }
         protected abstract Position StartOffset { get; }
-        public abstract int Id { get; }
+        public abstract int TetrominoID { get; }
 
         private int rotationState;
         private Position offset;

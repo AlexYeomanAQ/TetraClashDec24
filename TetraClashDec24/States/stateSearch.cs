@@ -59,20 +59,15 @@ namespace TetraClashDec24
 
         private async Task RunSearchAsync()
         {
-            TcpClient client = new TcpClient();
-            Console.WriteLine("Connecting to server...");
-            await client.ConnectAsync("127.0.0.1", 5000);
-            Console.WriteLine("Connected to server.");
-            NetworkStream stream = client.GetStream();
 
             // Send matchmaking request.
             byte[] requestBytes = Encoding.UTF8.GetBytes("search");
-            await stream.WriteAsync(requestBytes, 0, requestBytes.Length);
+            await App._stream.WriteAsync(requestBytes, 0, requestBytes.Length);
             Console.WriteLine("Sent matchmaking request.");
 
             // Wait for the match found response.
             byte[] buffer = new byte[4096];
-            int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+            int bytesRead = await App._stream.ReadAsync(buffer, 0, buffer.Length);
             if (bytesRead > 0)
             {
                 string response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
@@ -81,7 +76,7 @@ namespace TetraClashDec24
                     string matchId = response.Substring("MATCH_FOUND:".Length);
                     Console.WriteLine("Match found! Match ID: " + matchId);
 
-                    App.ChangeState(new MainGameState(App, prevClickState, client, matchID, matchID));
+                    App.ChangeState(new MainGameState(App, prevClickState, matchID, matchID));
                 }
                 else
                 {
@@ -95,7 +90,7 @@ namespace TetraClashDec24
             searchMessage = "Cancelling...";
             try
             {
-                string response = await Client.SendMessageAsync($"cancel:{App.Username}");
+                string response = await Client.SendMessageAsync(App._stream, $"cancel{App.Username}");
 
                 if (response == "Success")
                 {

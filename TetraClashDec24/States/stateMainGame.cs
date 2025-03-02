@@ -44,17 +44,13 @@ namespace TetraClashDec24
         private ButtonState prevClickState;
 
         // Store the TcpClient so that its NetworkStream remains valid.
-        private TcpClient _client;
-        private NetworkStream _stream;
 
         // Modified constructor: accepts TcpClient instead of a NetworkStream.
-        public MainGameState(App app, ButtonState clickState, TcpClient client, int matchID, int seed) : base(app)
+        public MainGameState(App app, ButtonState clickState, int matchID, int seed) : base(app)
         {
             prevClickState = clickState;
 
             // Keep the client alive for the lifetime of MainGameState.
-            _client = client;
-            _stream = _client.GetStream();
 
             blockTextures = new Texture2D[8];
 
@@ -79,10 +75,10 @@ namespace TetraClashDec24
             returnToMenu_Button = new Button(App, 860, 490, 200, 100, Color.White, "Return to Menu");
 
             // Start a task to continuously send grid updates.
-            _ = Task.Run(() => SendGridUpdatesAsync(_stream));
+            _ = Task.Run(() => SendGridUpdatesAsync(App._stream));
 
             // Listen for incoming grid updates from the opponent.
-            _ = Task.Run(() => ListenForGridUpdatesAsync(_stream));
+            _ = Task.Run(() => ListenForGridUpdatesAsync(App._stream));
         }
 
         public override void LoadContent()
@@ -144,7 +140,7 @@ namespace TetraClashDec24
 
                 fastDrop = fastSwitch;
 
-                if (!_isBlockTaskRunning && MatchResult != "")
+                if (!_isBlockTaskRunning && MatchResult == "")
                 {
                     DropBlock();
                 }
@@ -230,6 +226,7 @@ namespace TetraClashDec24
             finally
             {
                 _isBlockTaskRunning = false;
+                HandleGameOver();
             }
         }
 
@@ -237,7 +234,10 @@ namespace TetraClashDec24
         {
             foreach (Position p in block.TilePositions())
             {
-                spriteBatch.Draw(blockTextures[block.Id], new Rectangle(x + (p.Column * tileSize), y + (p.Row * tileSize), tileSize, tileSize), Color.White);
+                if (p.Row > 1)
+                {
+                    spriteBatch.Draw(blockTextures[block.TetrominoID], new Rectangle(x + (p.Column * tileSize), y + (p.Row * tileSize), tileSize, tileSize), Color.White);
+                }
             }
         }
 
@@ -247,7 +247,7 @@ namespace TetraClashDec24
 
             foreach (Position p in block.TilePositions())
             {
-                spriteBatch.Draw(blockTextures[block.Id], new Rectangle(x + (p.Column * tileSize), y + ((p.Row + dropDistance) * tileSize), tileSize, tileSize), new Color(64, 64, 64, 64));
+                spriteBatch.Draw(blockTextures[block.TetrominoID], new Rectangle(x + (p.Column * tileSize), y + ((p.Row + dropDistance) * tileSize), tileSize, tileSize), new Color(64, 64, 64, 64));
             }
         }
 
@@ -255,15 +255,13 @@ namespace TetraClashDec24
         {
             MatchResult = "You lose!";
             string message = $"lose";
-            await Client.SendMessageAsync(message);
+            await Client.SendMessageAsync(App._stream, message);
         }
 
         private async Task SendGridUpdatesAsync(NetworkStream stream)
         {
-            while (true)
+            while (!gameState.GameOver)
             {
-                //GameState tempGameState = gameState;
-                //tempGameState.PlaceBlock();
                 string gridJson = JsonSerializer.Serialize(gameState.GameGrid.grid);
                 string message = $"match:{gridJson}:{gameState.Level}:{gameState.Score}";
                 byte[] messageBytes = Encoding.UTF8.GetBytes(message);
@@ -285,7 +283,7 @@ namespace TetraClashDec24
         private async Task ListenForGridUpdatesAsync(NetworkStream stream)
         {
             byte[] buffer = new byte[4096];
-            while (true)
+            while (!gameState.GameOver)
             {
                 int bytesRead = 0;
                 try
@@ -321,6 +319,8 @@ namespace TetraClashDec24
                 }
                 else if (message.StartsWith("MATCH_WIN"))
                 {
+                    await Console.Out.WriteLineAsync("WE WON!");
+                    gameState.GameOver = true;
                     MatchResult = "You win!";
                 }
             }

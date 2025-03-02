@@ -9,31 +9,20 @@ namespace TetraClashDec24
 {
     public static class Client
     {
-        public static async Task<string> SendMessageAsync(string message)
+        public static async Task<string> SendMessageAsync(NetworkStream stream, string message)
         {
-            try
-            {
-                using (TcpClient client = new TcpClient("localhost", 5000))
-                {
-                    Console.WriteLine("Connected to server.");
-                    using (NetworkStream stream = client.GetStream())
-                    {
-                        byte[] buffer = Encoding.UTF8.GetBytes(message);
+            try {
+                    byte[] buffer = Encoding.UTF8.GetBytes(message);
+                    await stream.WriteAsync(buffer, 0, buffer.Length);
+                    Console.WriteLine($"Sent: {message}");
+                    string response = "";
+                    byte[] responseBuffer = new byte[1024];
+                    int bytesRead = await stream.ReadAsync(responseBuffer, 0, responseBuffer.Length);
+                    response = Encoding.UTF8.GetString(responseBuffer, 0, bytesRead);
 
-                        await stream.WriteAsync(buffer, 0, buffer.Length);
-                        Console.WriteLine($"Sent: {message}");
+                    Console.WriteLine(response);
 
-
-                        string response = "";
-                        byte[] responseBuffer = new byte[1024];
-                        int bytesRead = await stream.ReadAsync(responseBuffer, 0, responseBuffer.Length);
-                        response = Encoding.UTF8.GetString(responseBuffer, 0, bytesRead);
-
-                        Console.WriteLine(response);
-
-                        return response.Replace("\n", "");
-                    }
-                }
+                    return response.Replace("\n", "");
             }
             catch (Exception ex)
             {

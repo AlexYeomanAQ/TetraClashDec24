@@ -4,12 +4,13 @@ using Microsoft.Xna.Framework.Input;
 using SharpDX.Direct3D9;
 using System;
 using System.IO;
+using System.Net.Sockets;
 
 namespace TetraClashDec24
 {
     public class App : Game
     {
-        private GraphicsDeviceManager graphics;
+        private readonly GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
         private AppState _currentState;
@@ -18,6 +19,9 @@ namespace TetraClashDec24
         public SpriteFont titleFont;
         public Texture2D baseTexture;
         private Texture2D _background;
+
+        public TcpClient _client = null;
+        public NetworkStream _stream = null;
 
         public string Username;
         public string CachePath = "cache.txt";
@@ -66,6 +70,21 @@ namespace TetraClashDec24
                 Exit();
 
             _currentState.Update(gameTime);
+
+            if (_client != null)
+            {
+                if (_client.Connected)
+                {
+                    Console.WriteLine("Client is connected");
+                }
+                else
+                {
+                    Console.WriteLine("Client Disconnected, client is not null");
+                    string error = "Disconnected from Server, please log in again.";
+                    ChangeState(new LoginState(this, ButtonState.Pressed, Username, error));
+                }
+            }
+
             base.Update(gameTime);
         }
 

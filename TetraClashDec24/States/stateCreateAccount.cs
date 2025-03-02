@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Net.Sockets;
 
 namespace TetraClashDec24
 {
@@ -18,8 +19,8 @@ namespace TetraClashDec24
         private Texture2D titleTexture;
 
         private string ErrorString = "";
-        private string UBDefaultString = "Enter Username";
-        private string PBDefaultString = "Enter Password";
+        private readonly string UBDefaultString = "Enter Username";
+        private readonly string PBDefaultString = "Enter Password";
 
         private string username = "";
         private string password = "";
@@ -228,10 +229,12 @@ namespace TetraClashDec24
         }
         private async Task SubmitAccountAsync()
         {
+            App._client = new TcpClient("localhost", 5000);
+            App._stream = App._client.GetStream();
             string salt = Security.GenerateSalt();
             string hash = Security.GenerateHash(password, salt);
             string message = $"create{username}:{hash}:{salt}";
-            string response = await Client.SendMessageAsync(message);
+            string response = await Client.SendMessageAsync(App._stream, message);
 
             if (response == "Success")
             {

@@ -19,8 +19,9 @@ namespace TetraClashDec24
         public int TotalLinesCleared;
         public int Level;
         public int Score;
-        public GameGrid GameGrid { get; }        public BlockQueue BlockQueue { get; }
-        public bool GameOver { get; private set; }
+        public GameGrid GameGrid { get; }
+        public BlockQueue BlockQueue { get; }
+        public bool GameOver { get; set; }
 
         public GameState(int seed)
         {
@@ -93,7 +94,7 @@ namespace TetraClashDec24
         {
             foreach (Position p in CurrentBlock.TilePositions())
             {
-                GameGrid[p.Row, p.Column] = CurrentBlock.Id;
+                GameGrid[p.Row, p.Column] = CurrentBlock.TetrominoID;
             }
 
             int numRowsCleared = GameGrid.ClearFullRows();
