@@ -12,6 +12,7 @@ namespace TetraClashDec24
 {
     public class MainGameState : AppState
     {
+        private SpriteBatch spriteBatch;
         private Texture2D[] blockTextures;
         private Texture2D gridTexture;
 
@@ -52,13 +53,15 @@ namespace TetraClashDec24
 
             // Keep the client alive for the lifetime of MainGameState.
 
+            spriteBatch = new SpriteBatch(App.GraphicsDevice);
+
             blockTextures = new Texture2D[8];
 
             gameState = new GameState(seed);
 
-            PlayerGridX = 1920 / 4 - (gameState.GameGrid.Collumns * tileSize / 2);
+            PlayerGridX = 1920 / 4 - (gameState.GameGrid.Collumns * tileSize / 2) - 200;
             PlayerGridY = 1080 / 2 - ((gameState.GameGrid.Rows - 2) * tileSize / 2);
-            EnemyGridX = 1920 * 3 / 4 - (gameState.GameGrid.Collumns * tileSize / 2);
+            EnemyGridX = 1920 * 3 / 4 - (gameState.GameGrid.Collumns * tileSize / 2) - 200;
             EnemyGridY = PlayerGridY;
 
             dropTimer = 0;
@@ -161,13 +164,13 @@ namespace TetraClashDec24
 
         public override void Draw(GameTime gameTime)
         {
-            SpriteBatch spriteBatch = new SpriteBatch(App.GraphicsDevice);
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-            DrawGrid(spriteBatch, gameState.GameGrid.grid, PlayerGridX, PlayerGridY);
-            DrawGrid(spriteBatch, enemyGrid, EnemyGridX, EnemyGridY);
-            DrawBlock(spriteBatch, gameState.CurrentBlock, PlayerGridX, PlayerGridY);
-            DrawGhostBlock(spriteBatch, gameState.CurrentBlock, PlayerGridX, PlayerGridY);
+            DrawGrid(gameState.GameGrid.grid, PlayerGridX, PlayerGridY);
+            DrawGrid(enemyGrid, EnemyGridX, EnemyGridY);
+            DrawBlock(gameState.CurrentBlock, PlayerGridX, PlayerGridY);
+            DrawGhostBlock(gameState.CurrentBlock, PlayerGridX, PlayerGridY);
+            PreviewBlock(gameState.BlockQueue);
             spriteBatch.DrawString(App.titleFont, "Level", Cogs.centreTextPos(App.titleFont, "Level", 960, 520), Color.White);
             spriteBatch.DrawString(App.titleFont, gameState.Level.ToString(), Cogs.centreTextPos(App.font, gameState.Level.ToString(), 960, 580), Color.White);
             spriteBatch.DrawString(App.titleFont, "Lines Cleared", Cogs.centreTextPos(App.titleFont, "Lines Cleared", 960, 640), Color.White);
@@ -187,7 +190,7 @@ namespace TetraClashDec24
             spriteBatch.End();
         }
 
-        private void DrawGrid(SpriteBatch spriteBatch, int[][] grid, int x, int y)
+        private void DrawGrid(int[][] grid, int x, int y)
         {
             int Rows = grid.Length;
             int Columns = grid[0].Length; // Assumes at least one row exists.
@@ -230,18 +233,24 @@ namespace TetraClashDec24
             }
         }
 
-        private void DrawBlock(SpriteBatch spriteBatch, Block block, int x, int y)
+        private void PreviewBlock(BlockQueue blockQueue)
         {
-            foreach (Position p in block.TilePositions())
+            Block next = blockQueue.NextBlock;
+            DrawBlock(next, 960, 540, true);
+        }
+
+        private void DrawBlock(Block block, int x, int y, bool ignore_offset = false)
+        {
+            foreach (Position p in block.TilePositions(ignore_offset))
             {
-                if (p.Row > 1)
+                if (p.Row > 1 || ignore_offset)
                 {
                     spriteBatch.Draw(blockTextures[block.TetrominoID], new Rectangle(x + (p.Column * tileSize), y + (p.Row * tileSize), tileSize, tileSize), Color.White);
                 }
             }
         }
 
-        private void DrawGhostBlock(SpriteBatch spriteBatch, Block block, int x, int y)
+        private void DrawGhostBlock(Block block, int x, int y)
         {
             int dropDistance = gameState.BlockDropDistance();
 

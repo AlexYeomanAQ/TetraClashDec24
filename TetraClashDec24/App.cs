@@ -40,16 +40,17 @@ namespace TetraClashDec24
         {
 
             MouseState mouse = Mouse.GetState();
-
+            _client = new TcpClient("localhost", 5000);
+            _stream = _client.GetStream();
             if (File.Exists(CachePath))
             {
                 string[] lines = File.ReadAllLines(CachePath);
                 Username = lines[0];
-                _currentState = new LoginState(this, mouse.LeftButton, Username);
+                _currentState = new MainMenuState(this, mouse.LeftButton);
             }
             else
             {
-                _currentState = new CreateAccountState(this, mouse.LeftButton);
+                _currentState = new MainMenuState(this, mouse.LeftButton);
             }
             base.Initialize();
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,11 +21,18 @@ namespace TetraClashDec24
             offset = new Position(StartOffset.Row, StartOffset.Column);
         }
 
-        public IEnumerable<Position> TilePositions()
+        public IEnumerable<Position> TilePositions(bool ignore_offset = false)
         {
             foreach (Position p in Tiles[rotationState])
             {
-                yield return new Position(p.Row + offset.Row, p.Column + offset.Column);
+                if (ignore_offset)
+                {
+                    yield return new Position(p.Row, p.Column);
+                }
+                else
+                {
+                    yield return new Position(p.Row + offset.Row, p.Column + offset.Column);
+                }
             }
         }
 

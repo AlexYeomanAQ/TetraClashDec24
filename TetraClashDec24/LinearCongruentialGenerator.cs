@@ -28,8 +28,7 @@ namespace TetraClashDec24
             // Update the seed using the LCG formula.
             seed = (a * seed + c) % m;
 
-            // Map the result to the range [1, 7].
-            return (int)(seed % 7) + 1;
+            return (int)(seed % 7);
         }
     }
 }
