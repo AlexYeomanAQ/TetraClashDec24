@@ -1,8 +1,5 @@
-﻿- Preview Next Block
-- "Store" Block
-- Rename variables
-- Rating Preview
-- Friend Menu (If have time) (prob dont have time)#
+﻿- Rename variables
+- Friend Menu (If have time) (prob dont have time)
 - Match History (If have time)
 - Highscores (If have time)
 - For Async Buttons, add "activated" function to prevent the same request being submitted twice

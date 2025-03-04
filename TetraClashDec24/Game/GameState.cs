@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Content;
 using System;
 using System.Web;
+using System.Windows.Forms.VisualStyles;
 
 namespace TetraClashDec24
 {
@@ -22,11 +23,14 @@ namespace TetraClashDec24
         public GameGrid GameGrid { get; }
         public BlockQueue BlockQueue { get; }
         public bool GameOver { get; set; }
+        public Block HeldBlock { get; private set; }
+        public bool CanHold { get; private set; }
 
         public GameState(int seed)
         {
             GameGrid = new GameGrid(22, 10);
             BlockQueue = new BlockQueue(seed);
+            CanHold = true;
             TotalLinesCleared = 0;
             Level = 0;
             Score = 0;
@@ -90,6 +94,28 @@ namespace TetraClashDec24
             return !(GameGrid.IsRowEmpty(0) && GameGrid.IsRowEmpty(1));
         }
 
+        public void HoldBlock()
+        {
+            if (!CanHold)
+            {
+                return;
+            }
+            
+            if (HeldBlock == null)
+            {
+                HeldBlock = currentBlock;
+                currentBlock = BlockQueue.GetAndUpdate();
+            }
+            else
+            {
+                Block temporaryBlock = CurrentBlock;
+                CurrentBlock = HeldBlock;
+                HeldBlock = temporaryBlock;
+            }
+
+            CanHold = false;
+        }
+
         public void PlaceBlock()
         {
             foreach (Position p in CurrentBlock.TilePositions())
@@ -114,7 +140,9 @@ namespace TetraClashDec24
             else
             {
                 CurrentBlock = BlockQueue.GetAndUpdate();
+                CanHold = true;
             }
+
         }
 
         public void MoveBlockDown()
@@ -146,7 +174,7 @@ namespace TetraClashDec24
 
             foreach (Position p in CurrentBlock.TilePositions())
             {
-                drop = System.Math.Min(drop, TileDropDistance(p));
+                drop = Math.Min(drop, TileDropDistance(p));
             }
 
             return drop;

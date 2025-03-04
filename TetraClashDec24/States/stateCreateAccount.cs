@@ -240,6 +240,7 @@ namespace TetraClashDec24
             {
                 await Cogs.saveCache(username, salt);
                 App.Username = username;
+                App.Rating = 1000; //Since all new accounts
                 App.ChangeState(new MainMenuState(App, mouse.LeftButton));
             }
             else if (response == "Player Exists")

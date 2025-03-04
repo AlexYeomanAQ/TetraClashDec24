@@ -11,7 +11,6 @@ namespace TetraClashDec24
 {
     public class LoginState : AppState
     {
-        App App;
 
         private InputButton usernameBox;
         private InputButton passwordBox;
@@ -40,7 +39,6 @@ namespace TetraClashDec24
 
         public LoginState(App app, ButtonState clickState, string cache_username = "", string error_string = "") : base(app)
         {
-            App = app;
             prevClickState = clickState;
             username = cache_username;
             ErrorString = error_string;
@@ -239,8 +237,15 @@ namespace TetraClashDec24
 
         private async void LoginAsync()
         {
-            App._client = new TcpClient("localhost", 5000);
-            App._stream = App._client.GetStream();
+            try
+            {
+                App._client = new TcpClient("localhost", 5000);
+                App._stream = App._client.GetStream();
+            }
+            catch (Exception ex)
+            {
+                ErrorString = $"Error Connecting to server: {ex}";
+            }
             string salt = await FetchSalt();
             if (salt == "Username")
             {
@@ -257,15 +262,20 @@ namespace TetraClashDec24
                 string hash = Security.GenerateHash(password, salt);
                 string message = $"login{username}:{hash}";
                 string response = await Client.SendMessageAsync(App._stream, message);
-                if (response == "Success")
+                if (response.StartsWith("Success"))
                 {
                     App.Username = username;
+                    App.Rating = int.Parse(response.Substring(7));
                     App.ChangeState(new MainMenuState(App, mouse.LeftButton));
                 }
                 else if (response == "Password")
                 {
                     ErrorString = "Error: Password is incorrect, please retry.";
                     password = "";
+                }
+                else if (response == "Logged In")
+                {
+                    ErrorString = "Error: User is already logged in on another device.";
                 }
                 else
                 {

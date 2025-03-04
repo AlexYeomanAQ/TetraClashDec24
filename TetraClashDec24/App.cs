@@ -24,6 +24,8 @@ namespace TetraClashDec24
         public NetworkStream _stream = null;
 
         public string Username;
+        public int Rating;
+
         public string CachePath = "cache.txt";
         public App()
         {
@@ -40,17 +42,15 @@ namespace TetraClashDec24
         {
 
             MouseState mouse = Mouse.GetState();
-            _client = new TcpClient("localhost", 5000);
-            _stream = _client.GetStream();
             if (File.Exists(CachePath))
             {
                 string[] lines = File.ReadAllLines(CachePath);
                 Username = lines[0];
-                _currentState = new MainMenuState(this, mouse.LeftButton);
+                _currentState = new LoginState(this, mouse.LeftButton, Username);
             }
             else
             {
-                _currentState = new MainMenuState(this, mouse.LeftButton);
+                _currentState = new CreateAccountState(this, mouse.LeftButton);
             }
             base.Initialize();
         }
@@ -74,15 +74,14 @@ namespace TetraClashDec24
 
             if (_client != null)
             {
-                if (_client.Connected)
+                if (!_client.Connected)
                 {
-                    Console.WriteLine("Client is connected");
-                }
-                else
-                {
-                    Console.WriteLine("Client Disconnected, client is not null");
+                    Console.WriteLine("Client Disconnected, client i s not null");
                     string error = "Disconnected from Server, please log in again.";
-                    ChangeState(new LoginState(this, ButtonState.Pressed, Username, error));
+                    if (_currentState is not LoginState)
+                    {
+                        ChangeState(new LoginState(this, ButtonState.Pressed, Username, error));
+                    }
                 }
             }
 

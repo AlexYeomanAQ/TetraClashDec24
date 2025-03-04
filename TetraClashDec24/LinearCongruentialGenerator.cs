@@ -19,7 +19,7 @@ namespace TetraClashDec24
         // Constructor to initialize the generator with a seed.
         public LCGGenerator(long _seed)
         {
-            _seed = seed;
+            seed = _seed;
         }
 
         // Generates a pseudo-random number between 1 and 7.

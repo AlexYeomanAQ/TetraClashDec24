@@ -9,14 +9,16 @@ namespace TetraClashDec24
         Button PlayButton;
 
         private ButtonState prevClickState;
-        public MainMenuState(App game, ButtonState clickState) : base(game)
+
+        public MainMenuState(App app, ButtonState clickState) : base(app)
         {
             prevClickState = clickState;
+
         }
 
         public override void LoadContent()
         {
-            PlayButton = new Button(App, 880, 340, 200, 200, Color.White, "Play");
+            PlayButton = new Button(App, 860, 440, 200, 200, Color.White, "Play");
         }
 
         public override void Update(GameTime gameTime)
@@ -38,6 +40,8 @@ namespace TetraClashDec24
         {
             SpriteBatch spriteBatch = new SpriteBatch(App.GraphicsDevice);
             spriteBatch.Begin();
+            string ratingText = $"Current Rating: {App.Rating}";
+            spriteBatch.DrawString(App.titleFont, ratingText, Cogs.centreTextPos(App.titleFont, ratingText, 960, 750), Color.White);
             PlayButton.Draw(spriteBatch);
             spriteBatch.End();
         }
