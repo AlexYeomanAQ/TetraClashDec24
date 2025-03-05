@@ -305,7 +305,7 @@ namespace TetraClashDec24
 
         private async Task HandleGameOver()
         {
-            string message = $"lose";
+            string message = $"lose{gameState.Score}";
             await Client.SendMessageAsync(App._stream, message);
         }
 
@@ -377,6 +377,7 @@ namespace TetraClashDec24
                     RatingAdjustment = int.Parse(message.Split(':')[1]);
                     MatchResult = "You win!";
                     gameState.GameOver = true;
+                    await Client.SendMessageAsync(stream, $"score{gameState.Score}");
                     break;
                 }
                 else if (message.StartsWith("MATCH_LOSE"))
