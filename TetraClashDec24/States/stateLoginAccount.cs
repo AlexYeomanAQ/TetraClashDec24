@@ -261,10 +261,11 @@ namespace TetraClashDec24
             {
                 string hash = Security.GenerateHash(password, salt);
                 string message = $"login{username}:{hash}";
-                string response = await Client.SendMessageAsync(App._stream, message);
+                string response = await Client.SendMessageAsync(App._stream, message, true);
                 if (response.StartsWith("Success"))
                 {
                     App.Username = username;
+                    await Cogs.saveCache(username, salt);
                     App.Rating = int.Parse(response.Substring(7));
                     App.ChangeState(new MainMenuState(App, mouse.LeftButton));
                 }
@@ -292,7 +293,7 @@ namespace TetraClashDec24
             }
             else
             {
-                return await Task.Run(() => Client.SendMessageAsync(App._stream, $"salt{username}"));
+                return await Task.Run(() => Client.SendMessageAsync(App._stream, $"salt{username}", true));
             }
         }
     }

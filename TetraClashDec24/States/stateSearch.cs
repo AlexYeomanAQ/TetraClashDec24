@@ -30,7 +30,6 @@ namespace TetraClashDec24
 
         public override void Update(GameTime gameTime)
         {
-
             mouse = Mouse.GetState();
 
             if (mouse.LeftButton == ButtonState.Pressed && prevClickState != mouse.LeftButton)
@@ -107,6 +106,7 @@ namespace TetraClashDec24
             {
                 searchMessage = $"Error: {ex.Message}";
             }
+            prevClickState = ButtonState.Released; // Reset prevClickState after cancel
         }
     }
 }

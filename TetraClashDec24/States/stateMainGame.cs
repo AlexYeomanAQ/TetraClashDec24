@@ -305,8 +305,11 @@ namespace TetraClashDec24
 
         private async Task HandleGameOver()
         {
-            string message = $"lose{gameState.Score}";
-            await Client.SendMessageAsync(App._stream, message);
+            if (MatchResult == "")
+            {
+                string message = $"lose{gameState.Score}";
+                await Client.SendMessageAsync(App._stream, message);
+            }
         }
 
         private async Task SendGridUpdatesAsync(NetworkStream stream)

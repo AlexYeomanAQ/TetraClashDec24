@@ -6,6 +6,7 @@ using System;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Text.Json;
+using System.Net;
 
 namespace TetraClashDec24
 {
@@ -59,7 +60,7 @@ namespace TetraClashDec24
             try
             {
                 string message = $"highscores{username}";
-                highscores = JsonSerializer.Deserialize<List<(int Score, DateTime Date)>>(await Client.SendMessageAsync(stream, message));
+                highscores = JsonSerializer.Deserialize<List<(int Score, DateTime Date)>>(await Client.SendMessageAsync(stream, message, true));
             }
             catch (Exception ex)
             {

@@ -234,9 +234,9 @@ namespace TetraClashDec24
             string salt = Security.GenerateSalt();
             string hash = Security.GenerateHash(password, salt);
             string message = $"create{username}:{hash}:{salt}";
-            string response = await Client.SendMessageAsync(App._stream, message);
+            string response = await Client.SendMessageAsync(App._stream, message, true);
 
-            if (response == "Success")
+            if (response.StartsWith("Success"))
             {
                 await Cogs.saveCache(username, salt);
                 App.Username = username;
