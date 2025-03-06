@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TetraClashDec24
+﻿namespace TetraClashDec24
 {
-    public class GameGrid
+    public class GameBoard
     {
         public readonly int[][] grid;
         public int Rows { get; }
@@ -18,7 +12,7 @@ namespace TetraClashDec24
             set => grid[r][c] = value;
         }
 
-        public GameGrid(int rows, int collumns)
+        public GameBoard(int rows, int collumns)
         {
             Rows = rows;
             Collumns = collumns;
@@ -29,17 +23,17 @@ namespace TetraClashDec24
             }
         }
 
-        public bool IsInside(int r, int c)
+        public bool IsInBounds(int r, int c)
         {
             return r >= 0 && r < Rows && c >= 0 && c < Collumns;
         }
 
-        public bool IsEmpty(int r, int c)
+        public bool IsCellClear(int r, int c)
         {
-            return IsInside(r, c) && grid[r][c] == 0;
+            return IsInBounds(r, c) && grid[r][c] == 0;
         }
 
-        public bool IsRowFull(int r)
+        public bool IsLineComplete(int r)
         {
             for (int c = 0; c < Collumns; c++)
             {
@@ -51,7 +45,7 @@ namespace TetraClashDec24
             return true;
         }
 
-        public bool IsRowEmpty(int r)
+        public bool IsLineEmpty(int r)
         {
             for (int c = 0; c < Collumns; c++)
             {
@@ -63,7 +57,7 @@ namespace TetraClashDec24
             return true;
         }
 
-        private void ClearRow(int r)
+        private void ClearLine(int r)
         {
             for (int c = 0; c < Collumns; c++)
             {
@@ -71,7 +65,7 @@ namespace TetraClashDec24
             }
         }
 
-        private void MoveRowDown(int r, int numRows)
+        private void ShiftLineDown(int r, int numRows)
         {
             for (int c = 0; c < Collumns; c++)
             {
@@ -80,20 +74,20 @@ namespace TetraClashDec24
             }
         }
 
-        public int ClearFullRows()
+        public int ClearFullLines()
         {
             int cleared = 0;
 
             for (int r = Rows - 1; r >= 0; r--)
             {
-                if (IsRowFull(r))
+                if (IsLineComplete(r))
                 {
-                    ClearRow(r);
+                    ClearLine(r);
                     cleared++;
                 }
                 else if (cleared > 0)
                 {
-                    MoveRowDown(r, cleared);
+                    ShiftLineDown(r, cleared);
                 }
             }
 

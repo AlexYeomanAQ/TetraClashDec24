@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Threading.Tasks;
-using System.IO;
 using System.Net.Sockets;
 using System.Text.Json;
 using System.Text;
@@ -13,7 +12,7 @@ namespace TetraClashDec24
     public class MainGameState : AppState
     {
         private SpriteBatch spriteBatch;
-        private Texture2D[] blockTextures;
+        private Texture2D[] tetrominoTextures;
         private Texture2D gridTexture;
 
         private int tileSize = 25;
@@ -26,7 +25,7 @@ namespace TetraClashDec24
         private int dropRate;
         private bool fastDrop;
 
-        private GameState gameState;
+        private GameController gameController;
 
         private long MatchID;
         private string enemyUsername;
@@ -38,7 +37,7 @@ namespace TetraClashDec24
 
         private Button returnToMenu_Button;
 
-        private bool _isBlockTaskRunning = false;
+        private bool _isTetrominoTaskRunning = false;
 
         private KeyboardState keyboard;
         private MouseState mouse;
@@ -58,18 +57,18 @@ namespace TetraClashDec24
 
             spriteBatch = new SpriteBatch(App.GraphicsDevice);
 
-            blockTextures = new Texture2D[8];
+            tetrominoTextures = new Texture2D[8];
 
-            gameState = new GameState(seed);
+            gameController = new GameController(seed);
 
-            PlayerGridX = 1920 / 4 - (gameState.GameGrid.Collumns * tileSize / 2) - 200;
-            PlayerGridY = 1080 / 2 - ((gameState.GameGrid.Rows - 2) * tileSize / 2);
+            PlayerGridX = 1920 / 4 - (gameController.GameBoard.Collumns * tileSize / 2) - 200;
+            PlayerGridY = 1080 / 2 - ((gameController.GameBoard.Rows - 2) * tileSize / 2);
             enemyUsername = enemy_username;
-            EnemyGridX = 1920 * 3 / 4 - (gameState.GameGrid.Collumns * tileSize / 2) - 200;
+            EnemyGridX = 1920 * 3 / 4 - (gameController.GameBoard.Collumns * tileSize / 2) - 200;
             EnemyGridY = PlayerGridY;
 
             dropTimer = 0;
-            dropRate = Cogs.getDropRate(gameState.Level);
+            dropRate = Cogs.getDropRate(gameController.Level);
 
             MatchID = matchID;
             matchStartTime = DateTimeOffset.FromUnixTimeSeconds(MatchID).UtcDateTime;
@@ -95,9 +94,9 @@ namespace TetraClashDec24
 
         public override void LoadContent()
         {
-            for (int i = 0; i < blockTextures.Length + 1; i++)
+            for (int i = 0; i < tetrominoTextures.Length + 1; i++)
             {
-                blockTextures[i] = App.Content.Load<Texture2D>(@$"{i}");
+                tetrominoTextures[i] = App.Content.Load<Texture2D>(@$"{i}");
             }
 
         }
@@ -129,36 +128,36 @@ namespace TetraClashDec24
                     {
                         if (key == Keys.Left)
                         {
-                            gameState.MoveBlockLeft();
+                            gameController.TranslateTetrominoLeft();
                         }
                         else if (key == Keys.Right)
                         {
-                            gameState.MoveBlockRight();
+                            gameController.TranslateTetrominoRight();
                         }
                         else if (key == Keys.Up)
                         {
-                            gameState.DropBlock();
+                            gameController.DropTetromino();
                         }
                         else if (key == Keys.Z)
                         {
-                            gameState.RotateBlockCCW();
+                            gameController.RotateTetrominoCCW();
                         }
                         else if (key == Keys.X)
                         {
-                            gameState.RotateBlockCW();
+                            gameController.RotateTetrominoCW();
                         }
                         else if (key == Keys.C)
                         {
-                            gameState.HoldBlock();
+                            gameController.HoldTetromino();
                         }
                     }
                 }
 
                 fastDrop = fastSwitch;
 
-                if (!_isBlockTaskRunning && MatchResult == "")
+                if (!_isTetrominoTaskRunning && MatchResult == "")
                 {
-                    DropBlock();
+                    DropTetromino();
                 }
             }
             else
@@ -179,32 +178,32 @@ namespace TetraClashDec24
         {
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
 
-            DrawGrid(gameState.GameGrid.grid, PlayerGridX, PlayerGridY);
+            DrawGrid(gameController.GameBoard.grid, PlayerGridX, PlayerGridY);
             DrawGrid(enemyGrid, EnemyGridX, EnemyGridY);
-            DrawBlock(gameState.CurrentBlock, PlayerGridX, PlayerGridY);
-            DrawGhostBlock(gameState.CurrentBlock, PlayerGridX, PlayerGridY);
-            DrawPreviewBlock(gameState.BlockQueue);
+            DrawTetromino(gameController.CurrentTetromino, PlayerGridX, PlayerGridY);
+            DrawGhostTetromino(gameController.CurrentTetromino, PlayerGridX, PlayerGridY);
+            DrawPreviewTetromino(gameController.TetrominoQueue);
 
-            spriteBatch.DrawString(App.titleFont, "Next Block", new Vector2(640, 700), Color.White);
+            spriteBatch.DrawString(App.titleFont, "Next Tetromino", new Vector2(640, 700), Color.White);
             spriteBatch.Draw(App.baseTexture, new Rectangle(640, 730, 100, 100), Color.Black);
-            if (gameState.HeldBlock != null)
+            if (gameController.HeldTetromino != null)
             {
-                DrawHeldBlock();
+                DrawHeldTetromino();
             }
 
             spriteBatch.DrawString(App.titleFont, "Level", Cogs.centreTextPos(App.titleFont, "Level", 960, 520), Color.White);
-            spriteBatch.DrawString(App.titleFont, gameState.Level.ToString(), Cogs.centreTextPos(App.font, gameState.Level.ToString(), 960, 580), Color.White);
+            spriteBatch.DrawString(App.titleFont, gameController.Level.ToString(), Cogs.centreTextPos(App.font, gameController.Level.ToString(), 960, 580), Color.White);
             spriteBatch.DrawString(App.titleFont, "Lines Cleared", Cogs.centreTextPos(App.titleFont, "Lines Cleared", 960, 640), Color.White);
-            spriteBatch.DrawString(App.titleFont, gameState.TotalLinesCleared.ToString(), Cogs.centreTextPos(App.font, gameState.TotalLinesCleared.ToString(), 960, 700), Color.White);
+            spriteBatch.DrawString(App.titleFont, gameController.TotalLinesCleared.ToString(), Cogs.centreTextPos(App.font, gameController.TotalLinesCleared.ToString(), 960, 700), Color.White);
             spriteBatch.DrawString(App.titleFont, "Score", Cogs.centreTextPos(App.titleFont, "Score", 960, 760), Color.White);
-            spriteBatch.DrawString(App.titleFont, gameState.Score.ToString(), Cogs.centreTextPos(App.font, gameState.Score.ToString(), 960, 820), Color.White);
+            spriteBatch.DrawString(App.titleFont, gameController.Score.ToString(), Cogs.centreTextPos(App.font, gameController.Score.ToString(), 960, 820), Color.White);
             spriteBatch.DrawString(App.titleFont, enemyUsername, Cogs.centreTextPos(App.titleFont, enemyUsername, EnemyGridX, EnemyGridY - 100), Color.White);
             spriteBatch.DrawString(App.titleFont, "Level", Cogs.centreTextPos(App.titleFont, "Level", 1650, 520), Color.White);
             spriteBatch.DrawString(App.titleFont, enemyLevel, Cogs.centreTextPos(App.font, enemyLevel, 1650, 580), Color.White);
             spriteBatch.DrawString(App.titleFont, "Score", Cogs.centreTextPos(App.titleFont, "Score", 1650, 640), Color.White);
             spriteBatch.DrawString(App.titleFont, enemyScore, Cogs.centreTextPos(App.font, enemyScore, 1650, 700), Color.White);
 
-            if (gameState.GameOver)
+            if (gameController.GameOver)
             {
                 spriteBatch.Draw(App.baseTexture, new Rectangle(0, 0, 1920, 1080), new Color(64, 64, 64, 64));
                 spriteBatch.DrawString(App.titleFont, MatchResult, Cogs.centreTextPos(App.titleFont, MatchResult, 960, 540), Color.Black);
@@ -233,20 +232,20 @@ namespace TetraClashDec24
                 for (int c = 0; c < Columns; c++)
                 {
                     int id = grid[r][c];
-                    spriteBatch.Draw(blockTextures[id], new Rectangle(x + (c * tileSize), y + (r * tileSize), tileSize, tileSize), Color.White);
+                    spriteBatch.Draw(tetrominoTextures[id], new Rectangle(x + (c * tileSize), y + (r * tileSize), tileSize, tileSize), Color.White);
                 }
             }
         }
 
-        private async void DropBlock()
+        private async void DropTetromino()
         {
-            _isBlockTaskRunning = true;
+            _isTetrominoTaskRunning = true;
 
             try
             {
-                while (!gameState.GameOver)
+                while (!gameController.GameOver)
                 {
-                    dropRate = Cogs.getDropRate(gameState.Level);
+                    dropRate = Cogs.getDropRate(gameController.Level);
                     if (fastDrop)
                     {
                         await Task.Delay(dropRate / 2);
@@ -256,58 +255,58 @@ namespace TetraClashDec24
                         await Task.Delay(dropRate);
                     }
 
-                    gameState.MoveBlockDown();
+                    gameController.TranslateTetrominoDown();
                 }
             }
             finally
             {
-                _isBlockTaskRunning = false;
+                _isTetrominoTaskRunning = false;
                 await HandleGameOver();
             }
         }
-        private void DrawBlock(Block block, int x, int y, bool ignore_offset = false)
+        private void DrawTetromino(Tetromino tetromino, int x, int y, bool ignore_offset = false)
         {
-            foreach (Position p in block.TilePositions(ignore_offset))
+            foreach (Position p in tetromino.BlockPositions(ignore_offset))
             {
                 if (p.Row > 1 || ignore_offset)
                 {
-                    spriteBatch.Draw(blockTextures[block.TetrominoID], new Rectangle(x + (p.Column * tileSize), y + (p.Row * tileSize), tileSize, tileSize), Color.White);
+                    spriteBatch.Draw(tetrominoTextures[tetromino.TetrominoID], new Rectangle(x + (p.Column * tileSize), y + (p.Row * tileSize), tileSize, tileSize), Color.White);
                 }
             }
         }
 
-        private void DrawGhostBlock(Block block, int x, int y)
+        private void DrawGhostTetromino(Tetromino tetromino, int x, int y)
         {
-            int dropDistance = gameState.BlockDropDistance();
+            int dropDistance = gameController.TetrominoDropDistance();
 
-            foreach (Position p in block.TilePositions())
+            foreach (Position p in tetromino.BlockPositions())
             {
                 if (p.Row + dropDistance > 1)
                 {
-                    spriteBatch.Draw(blockTextures[block.TetrominoID], new Rectangle(x + (p.Column * tileSize), y + ((p.Row + dropDistance) * tileSize), tileSize, tileSize), new Color(64, 64, 64, 64));
+                    spriteBatch.Draw(tetrominoTextures[tetromino.TetrominoID], new Rectangle(x + (p.Column * tileSize), y + ((p.Row + dropDistance) * tileSize), tileSize, tileSize), new Color(64, 64, 64, 64));
                 }
 
             }
         }
 
-        private void DrawPreviewBlock(BlockQueue blockQueue)
+        private void DrawPreviewTetromino(TetrominoQueue tetrominoQueue)
         {
-            Block next = blockQueue.NextBlock;
-            spriteBatch.DrawString(App.titleFont, "Next Block", new Vector2(640, 500), Color.White);
+            Tetromino next = tetrominoQueue.NextTetromino;
+            spriteBatch.DrawString(App.titleFont, "Next Tetromino", new Vector2(640, 500), Color.White);
             spriteBatch.Draw(App.baseTexture, new Rectangle(640, 530, 100, 100), Color.Black);
-            DrawBlock(next, 650, 540, true);
+            DrawTetromino(next, 650, 540, true);
         }
 
-        private void DrawHeldBlock()
+        private void DrawHeldTetromino()
         {
-            DrawBlock(gameState.HeldBlock, 650, 740, true);
+            DrawTetromino(gameController.HeldTetromino, 650, 740, true);
         }
 
         private async Task HandleGameOver()
         {
             if (MatchResult == "")
             {
-                string message = $"lose{gameState.Score}";
+                string message = $"lose{gameController.Score}";
                 await Client.SendMessageAsync(App._stream, message);
             }
         }
@@ -316,8 +315,8 @@ namespace TetraClashDec24
         {
             while (true)
             {
-                string gridJson = JsonSerializer.Serialize(gameState.GameGrid.grid);
-                string message = $"match:{gridJson}:{gameState.Level}:{gameState.Score}";
+                string gridJson = JsonSerializer.Serialize(gameController.GameBoard.grid);
+                string message = $"match:{gridJson}:{gameController.Level}:{gameController.Score}";
                 byte[] messageBytes = Encoding.UTF8.GetBytes(message);
                 try
                 {
@@ -330,7 +329,7 @@ namespace TetraClashDec24
                     break;
                 }
                 await Task.Delay(dropRate); // Delay before sending the next update.
-                if (gameState.GameOver)
+                if (gameController.GameOver)
                 {
                     break;
                 }
@@ -379,8 +378,8 @@ namespace TetraClashDec24
                 {
                     RatingAdjustment = int.Parse(message.Split(':')[1]);
                     MatchResult = "You win!";
-                    gameState.GameOver = true;
-                    await Client.SendMessageAsync(stream, $"score{gameState.Score}");
+                    gameController.GameOver = true;
+                    await Client.SendMessageAsync(stream, $"score{gameController.Score}");
                     break;
                 }
                 else if (message.StartsWith("MATCH_LOSE"))
@@ -397,7 +396,7 @@ namespace TetraClashDec24
                     {
                         RatingAdjustment *= -1;
                     }
-                    gameState.GameOver = true;
+                    gameController.GameOver = true;
                     break;
                 }
             }
@@ -413,8 +412,8 @@ namespace TetraClashDec24
                 if (elapsedTime >= matchDuration)
                 {
                     Console.WriteLine("Test");
-                    gameState.GameOver = true;
-                    await Client.SendMessageAsync(App._stream, $"time{gameState.Score}");
+                    gameController.GameOver = true;
+                    await Client.SendMessageAsync(App._stream, $"time{gameController.Score}");
                     break;
                 }
                 await Task.Delay(1000);

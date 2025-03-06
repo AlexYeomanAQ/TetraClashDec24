@@ -3,8 +3,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Threading.Tasks;
 using System;
-using System.Reflection.Metadata.Ecma335;
-using System.Net.Sockets;
 using System.Text;
 
 namespace TetraClashDec24

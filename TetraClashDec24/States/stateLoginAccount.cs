@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework.Graphics;
 using System.Threading.Tasks;
 using System.IO;
 using System;
-using SharpDX.Win32;
 using System.Net.Sockets;
 
 namespace TetraClashDec24
@@ -12,8 +11,8 @@ namespace TetraClashDec24
     public class LoginState : AppState
     {
 
-        private InputButton usernameBox;
-        private InputButton passwordBox;
+        private Button usernameBox;
+        private Button passwordBox;
 
         private Button submitButton;
         private Button createAccountButton;
@@ -46,9 +45,9 @@ namespace TetraClashDec24
 
         public override void LoadContent()
         {
-            usernameBox = new InputButton(App, 835, 600, 250, 50, Color.White, username);
+            usernameBox = new Button(App, 835, 600, 250, 50, Color.White, username);
 
-            passwordBox = new InputButton(App, 835, 675, 250, 50, Color.White, PBDefaultString);
+            passwordBox = new Button(App, 835, 675, 250, 50, Color.White, PBDefaultString);
 
             submitButton = new Button(App, 885, 750, 150, 100, Color.White, "Submit!");
 
@@ -95,17 +94,17 @@ namespace TetraClashDec24
             {
                 username = input;
                 usernameBox.Text = username;
-                usernameBox.highlighted = true;
+                usernameBox.Highlighted = true;
             }
             else if (focusedField == InputField.Password)
             {
                 password = input;
                 passwordBox.Text = new string('*', password.Length);
-                passwordBox.highlighted = true;
+                passwordBox.Highlighted = true;
             }
             if (focusedField != InputField.Username)
             {
-                usernameBox.highlighted = false;
+                usernameBox.Highlighted = false;
                 if (username == "")
                 {
                     usernameBox.Text = UBDefaultString;
@@ -113,7 +112,7 @@ namespace TetraClashDec24
             }
             if (focusedField != InputField.Password)
             {
-                passwordBox.highlighted = false;
+                passwordBox.Highlighted = false;
                 if (password == "")
                 {
                     passwordBox.Text = PBDefaultString;

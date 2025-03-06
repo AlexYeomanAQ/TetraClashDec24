@@ -1,50 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TetraClashDec24
+﻿namespace TetraClashDec24
 {
-    public class BlockQueue
+    public class TetrominoQueue
     {
-        private readonly Block[] blocks = new Block[]
+        private readonly Tetromino[] tetrominos = new Tetromino[]
         {
-            new IBlock(),
-            new JBlock(),
-            new LBlock(),
-            new OBlock(),
-            new SBlock(),
-            new TBlock(),
-            new ZBlock(),
+            new TetrominoI(),
+            new TetrominoJ(),
+            new TetrominoL(),
+            new TetrominoO(),
+            new TetrominoS(),
+            new TetrominoT(),
+            new TetrominoZ(),
         };
 
         private LCGGenerator LCGGen;
 
-        public Block NextBlock { get; private set; }
+        public Tetromino NextTetromino { get; private set; }
 
-        public BlockQueue(int seed)
+        public TetrominoQueue(int seed)
         {
             LCGGen = new LCGGenerator(seed);
-            NextBlock = RandomBlock();
+            NextTetromino = RandomTetromino();
         }
 
-        public Block RandomBlock()
+        public Tetromino RandomTetromino()
         {
-            return blocks[LCGGen.NextTetrominoValue()];
+            return tetrominos[LCGGen.NextTetrominoValue()];
         }
 
-        public Block GetAndUpdate()
+        public Tetromino FetchAndRefresh()
         {
-            Block block = NextBlock;
+            Tetromino tetromino = NextTetromino;
 
             do
             {
-                NextBlock = RandomBlock();
+                NextTetromino = RandomTetromino();
             }
-            while (block.TetrominoID == NextBlock.TetrominoID);
+            while (tetromino.TetrominoID == NextTetromino.TetrominoID);
 
-            return block;
+            return tetromino;
         }
     }
 }
