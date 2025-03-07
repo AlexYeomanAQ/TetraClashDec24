@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Threading.Tasks;
 using System.Net.Sockets;
+using System.Text.RegularExpressions;
 
 namespace TetraClashDec24
 {
@@ -230,6 +231,10 @@ namespace TetraClashDec24
         {
             App._client = new TcpClient("localhost", 5000);
             App._stream = App._client.GetStream();
+            if (!ValidCredentials())
+            {
+
+            }
             string salt = Security.GenerateSalt();
             string hash = Security.GenerateHash(password, salt);
             string message = $"create{username}:{hash}:{salt}";
@@ -250,6 +255,20 @@ namespace TetraClashDec24
             {
                 ErrorString = $"Unknown Error: {response}";
             }
+        }
+
+        private bool ValidCredentials()
+        {
+            if (username.Length < 5 || username.Length > 15)
+            {
+                return false;
+            }
+            string regex = @"^(?=.*[!@#$%^&*()_+\-=\[\]{};':""\\|,.<>\/?])(?=.*[0-9]).{8,}$";
+            if (!Regex.IsMatch(password, regex))
+            {
+                return false;
+            }
+            return true;
         }
     }
 }
