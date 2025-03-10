@@ -16,7 +16,7 @@ namespace TetraClashDec24
         Button PlayButton;
 
         private ButtonState prevClickState;
-        List<(int Score, DateTime Date)> highscores;
+        List<(int Score, string Date)> highscores;
 
         public MainMenuState(App app, ButtonState clickState) : base(app)
         {
@@ -59,7 +59,8 @@ namespace TetraClashDec24
             try
             {
                 string message = $"highscores{username}";
-                highscores = JsonSerializer.Deserialize<List<(int Score, DateTime Date)>>(await Client.SendMessageAsync(stream, message, true));
+                string highscoresJson = await Client.SendMessageAsync(stream, message, true);
+                highscores = highscoresJson == null ? JsonSerializer.Deserialize<List<(int Score, string Date)>>(highscoresJson) : null;
             }
             catch (Exception ex)
             {
@@ -83,13 +84,16 @@ namespace TetraClashDec24
             spriteBatch.DrawString(App.font, "Date", new Vector2(startX + 200, startY), headerColor);
 
             // Draw highscores
-            for (int i = 0; i < Math.Min(highscores.Count, 10); i++)
+            if (highscores.Count > 0)
             {
-                int yOffset = startY + (i + 1) * lineHeight;
-                spriteBatch.DrawString(App.font, highscores[i].Score.ToString(),
-                    new Vector2(startX, yOffset), textColor);
-                spriteBatch.DrawString(App.font, highscores[i].Date.ToString("yyyy-MM-dd HH:mm"),
-                    new Vector2(startX + 200, yOffset), textColor);
+                for (int i = 0; i < Math.Min(highscores.Count, 10); i++)
+                {
+                    int yOffset = startY + (i + 1) * lineHeight;
+                    spriteBatch.DrawString(App.font, highscores[i].Score.ToString(),
+                        new Vector2(startX, yOffset), textColor);
+                    spriteBatch.DrawString(App.font, highscores[i].Date.Substring(0, 10),
+                        new Vector2(startX + 200, yOffset), textColor);
+                }
             }
         }
     }

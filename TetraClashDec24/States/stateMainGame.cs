@@ -28,10 +28,14 @@ namespace TetraClashDec24
         private GameController gameController;
 
         private long MatchID;
+
         private string enemyUsername;
         private int[][] enemyGrid;
         private string enemyLevel = "0";
         private string enemyScore = "0";
+        private Tetromino enemyFallingTetromino;
+
+
         private string MatchResult = "";
         private int RatingAdjustment;
 
@@ -46,7 +50,7 @@ namespace TetraClashDec24
         private ButtonState prevClickState;
 
         private DateTime matchStartTime;
-        private TimeSpan matchDuration = TimeSpan.FromMinutes(0.5);
+        private TimeSpan matchDuration = TimeSpan.FromMinutes(1);
 
         // Store the TcpClient so that its NetworkStream remains valid.
 
@@ -248,7 +252,7 @@ namespace TetraClashDec24
                     dropRate = Cogs.getDropRate(gameController.Level);
                     if (fastDrop)
                     {
-                        await Task.Delay(dropRate / 2);
+                        await Task.Delay(Math.Min(100, dropRate));
                     }
                     else
                     {
@@ -316,7 +320,10 @@ namespace TetraClashDec24
             while (true)
             {
                 string gridJson = JsonSerializer.Serialize(gameController.GameBoard.grid);
-                string message = $"match:{gridJson}:{gameController.Level}:{gameController.Score}";
+                string fallingTetrominoJson = JsonSerializer.Serialize(gameController.CurrentTetromino);
+                string previewTetrominoJson = JsonSerializer.Serialize(gameController.TetrominoQueue.NextTetromino);
+                string holdTetrominoJson = JsonSerializer.Serialize(gameController.HeldTetromino);
+                string message = $"match:{gridJson}:{fallingTetrominoJson}:{previewTetrominoJson}:{holdTetrominoJson}:{gameController.Level}:{gameController.Score}";
                 byte[] messageBytes = Encoding.UTF8.GetBytes(message);
                 try
                 {
@@ -365,8 +372,11 @@ namespace TetraClashDec24
                     try
                     {
                         enemyGrid = JsonSerializer.Deserialize<int[][]>(args[0]);
-                        enemyLevel = args[1];
-                        enemyScore = args[2];
+                        enemyFallingTetromino = JsonSerializer.Deserialize<Tetromino>(args[1]);
+                        enemyPreviewTetromino = JsonSerializer.Deserialize<Tetromino>(args[2]);
+                        enemyHeldTetromino = JsonSerializer.Deserialize<Tetromino>(args[3]);
+                        enemyLevel = args[4];
+                        enemyScore = args[5];
                         Console.WriteLine("Received match update.");
                     }
                     catch (Exception ex)

@@ -23,11 +23,11 @@ namespace TetraClashDec24
         {
             if (Highlighted)
             {
-                spriteBatch.Draw(App.baseTexture, Box, Color.LightBlue);
+                spriteBatch.Draw(App.highlightTexture, Box, Colour);
             }
             else
             {
-                spriteBatch.Draw(App.baseTexture, Box, Colour);
+                spriteBatch.Draw(App.buttonTexture, Box, Colour);
             }
 
             if (Text != "")

@@ -17,7 +17,9 @@ namespace TetraClashDec24
         public SpriteFont font;
         public SpriteFont titleFont;
         public Texture2D baseTexture;
-        private Texture2D _background;
+        public Texture2D buttonTexture;
+        public Texture2D highlightTexture;
+        private Texture2D backgroundTexture;
 
         public TcpClient _client = null;
         public NetworkStream _stream = null;
@@ -60,7 +62,9 @@ namespace TetraClashDec24
             font = Content.Load<SpriteFont>(@"myFont");
             titleFont = Content.Load<SpriteFont>(@"titleFont");
             baseTexture = Content.Load<Texture2D>(@"base");
-            _background = Content.Load<Texture2D>(@"background");
+            buttonTexture = Content.Load<Texture2D>(@"button");
+            highlightTexture = Content.Load<Texture2D>(@"highlight");
+            backgroundTexture = Content.Load<Texture2D>(@"background");
             _currentState.LoadContent();
         }
 
@@ -92,7 +96,7 @@ namespace TetraClashDec24
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             spriteBatch.Begin();
-            spriteBatch.Draw(_background, new Rectangle(0, 0, 1920, 1080), Color.White);
+            spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, 1920, 1080), Color.White);
             spriteBatch.End();
             _currentState.Draw(gameTime);
             base.Draw(gameTime);

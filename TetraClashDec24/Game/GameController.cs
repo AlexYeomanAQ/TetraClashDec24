@@ -139,7 +139,6 @@ namespace TetraClashDec24
                 CurrentTetromino = TetrominoQueue.FetchAndRefresh();
                 CanHold = true;
             }
-
         }
 
         public void TranslateTetrominoDown()

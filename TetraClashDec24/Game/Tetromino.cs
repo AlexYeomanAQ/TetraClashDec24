@@ -18,7 +18,7 @@ namespace TetraClashDec24
 
         public IEnumerable<Position> BlockPositions(bool ignore_offset = false)
         {
-            foreach (Position p in Blocks[rotationIndex])
+            foreach (Position p in Blocks[ignore_offset ? 0 : rotationIndex])
             {
                 if (ignore_offset)
                 {
