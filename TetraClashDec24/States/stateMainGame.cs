@@ -225,18 +225,11 @@ namespace TetraClashDec24
             spriteBatch.DrawString(App.titleFont, gameController.TotalLinesCleared.ToString(), Cogs.centreTextPos(App.font, gameController.TotalLinesCleared.ToString(), 960, 700), Color.White);
             spriteBatch.DrawString(App.titleFont, "Score", Cogs.centreTextPos(App.titleFont, "Score", 960, 760), Color.White);
             spriteBatch.DrawString(App.titleFont, gameController.Score.ToString(), Cogs.centreTextPos(App.font, gameController.Score.ToString(), 960, 820), Color.White);
-            spriteBatch.DrawString(App.titleFont, enemyUsername, Cogs.centreTextPos(App.titleFont, enemyUsername, EnemyGridX, EnemyGridY - 100), Color.White);
+            spriteBatch.DrawString(App.titleFont, enemyUsername, Cogs.centreTextPos(App.titleFont, enemyUsername, EnemyGridX+75, EnemyGridY - 30), Color.White);
             spriteBatch.DrawString(App.titleFont, "Level", Cogs.centreTextPos(App.titleFont, "Level", 1650, 520), Color.White);
             spriteBatch.DrawString(App.titleFont, enemyLevel, Cogs.centreTextPos(App.font, enemyLevel, 1650, 580), Color.White);
             spriteBatch.DrawString(App.titleFont, "Score", Cogs.centreTextPos(App.titleFont, "Score", 1650, 640), Color.White);
             spriteBatch.DrawString(App.titleFont, enemyScore, Cogs.centreTextPos(App.font, enemyScore, 1650, 700), Color.White);
-
-            // Enemy tetromino info
-            spriteBatch.DrawString(App.titleFont, "Next", new Vector2(1600, 500), Color.White);
-            spriteBatch.Draw(App.baseTexture, new Rectangle(1600, 530, 100, 100), Color.Black);
-
-            spriteBatch.DrawString(App.titleFont, "Hold", new Vector2(1600, 700), Color.White);
-            spriteBatch.Draw(App.baseTexture, new Rectangle(1600, 730, 100, 100), Color.Black);
 
             if (gameController.GameOver)
             {
