@@ -460,22 +460,6 @@ namespace TetraClashDec24
                         if (args.Length >= 7) // Make sure we have all the necessary components
                         {
                             enemyGrid = JsonSerializer.Deserialize<int[][]>(args[0]);
-
-                            // Deserialize the simplified tetromino data
-                            TetrominoData fallingTetrominoData = JsonSerializer.Deserialize<TetrominoData>(args[1]);
-                            TetrominoData previewTetrominoData = JsonSerializer.Deserialize<TetrominoData>(args[2]);
-                            TetrominoData holdTetrominoData = JsonSerializer.Deserialize<TetrominoData>(args[3]);
-
-                            // Recreate the tetrominos from the data
-                            enemyFallingTetromino = fallingTetrominoData != null ?
-                                new Tetromino(fallingTetrominoData.Id, fallingTetrominoData.OffsetRow, fallingTetrominoData.OffsetColumn, fallingTetrominoData.RotationState) : null;
-
-                            enemyPreviewTetromino = previewTetrominoData != null ?
-                                new Tetromino(previewTetrominoData.Id, 0, 0, previewTetrominoData.RotationState) : null;
-
-                            enemyHeldTetromino = holdTetrominoData != null ?
-                                new Tetromino(holdTetrominoData.Id, 0, 0, holdTetrominoData.RotationState) : null;
-
                             enemyLevel = args[4];
                             enemyScore = args[5];
                             enemyDropDistance = JsonSerializer.Deserialize<int>(args[6]);
