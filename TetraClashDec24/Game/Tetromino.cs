@@ -49,7 +49,7 @@ namespace TetraClashDec24
         }
 
         public void Translate(int rows, int columns)
-        {
+        {  
             placement.Row += rows;
             placement.Column += columns;
         }

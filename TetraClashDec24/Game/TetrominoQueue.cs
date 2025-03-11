@@ -2,7 +2,7 @@
 {
     public class TetrominoQueue
     {
-        private readonly Tetromino[] tetrominos = new Tetromino[]
+        public readonly Tetromino[] tetrominos = new Tetromino[]
         {
             new TetrominoI(),
             new TetrominoJ(),

@@ -34,7 +34,9 @@ namespace TetraClashDec24
         private string enemyLevel = "0";
         private string enemyScore = "0";
         private Tetromino enemyFallingTetromino;
-
+        private Tetromino enemyPreviewTetromino;
+        private Tetromino enemyHeldTetromino;
+        private int enemyDropDistance = 0;
 
         private string MatchResult = "";
         private int RatingAdjustment;
@@ -182,11 +184,32 @@ namespace TetraClashDec24
         {
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
 
+            // Player side
             DrawGrid(gameController.GameBoard.grid, PlayerGridX, PlayerGridY);
-            DrawGrid(enemyGrid, EnemyGridX, EnemyGridY);
             DrawTetromino(gameController.CurrentTetromino, PlayerGridX, PlayerGridY);
             DrawGhostTetromino(gameController.CurrentTetromino, PlayerGridX, PlayerGridY);
             DrawPreviewTetromino(gameController.TetrominoQueue);
+
+            // Enemy side
+            DrawGrid(enemyGrid, EnemyGridX, EnemyGridY);
+            if (enemyFallingTetromino != null)
+            {
+                DrawTetromino(enemyFallingTetromino, EnemyGridX, EnemyGridY);
+                if (enemyDropDistance > 0)
+                {
+                    DrawEnemyGhostTetromino(enemyFallingTetromino, EnemyGridX, EnemyGridY);
+                }
+            }
+
+            if (enemyPreviewTetromino != null)
+            {
+                DrawEnemyPreviewTetromino(enemyPreviewTetromino);
+            }
+
+            if (enemyHeldTetromino != null)
+            {
+                DrawEnemyHeldTetromino(enemyHeldTetromino);
+            }
 
             spriteBatch.DrawString(App.titleFont, "Next Tetromino", new Vector2(640, 700), Color.White);
             spriteBatch.Draw(App.baseTexture, new Rectangle(640, 730, 100, 100), Color.Black);
@@ -206,6 +229,13 @@ namespace TetraClashDec24
             spriteBatch.DrawString(App.titleFont, enemyLevel, Cogs.centreTextPos(App.font, enemyLevel, 1650, 580), Color.White);
             spriteBatch.DrawString(App.titleFont, "Score", Cogs.centreTextPos(App.titleFont, "Score", 1650, 640), Color.White);
             spriteBatch.DrawString(App.titleFont, enemyScore, Cogs.centreTextPos(App.font, enemyScore, 1650, 700), Color.White);
+
+            // Enemy tetromino info
+            spriteBatch.DrawString(App.titleFont, "Next", new Vector2(1600, 500), Color.White);
+            spriteBatch.Draw(App.baseTexture, new Rectangle(1600, 530, 100, 100), Color.Black);
+
+            spriteBatch.DrawString(App.titleFont, "Hold", new Vector2(1600, 700), Color.White);
+            spriteBatch.Draw(App.baseTexture, new Rectangle(1600, 730, 100, 100), Color.Black);
 
             if (gameController.GameOver)
             {
@@ -268,8 +298,11 @@ namespace TetraClashDec24
                 await HandleGameOver();
             }
         }
+
         private void DrawTetromino(Tetromino tetromino, int x, int y, bool ignore_offset = false)
         {
+            if (tetromino == null) return;
+
             foreach (Position p in tetromino.BlockPositions(ignore_offset))
             {
                 if (p.Row > 1 || ignore_offset)
@@ -281,6 +314,8 @@ namespace TetraClashDec24
 
         private void DrawGhostTetromino(Tetromino tetromino, int x, int y)
         {
+            if (tetromino == null) return;
+
             int dropDistance = gameController.TetrominoDropDistance();
 
             foreach (Position p in tetromino.BlockPositions())
@@ -289,7 +324,19 @@ namespace TetraClashDec24
                 {
                     spriteBatch.Draw(tetrominoTextures[tetromino.TetrominoID], new Rectangle(x + (p.Column * tileSize), y + ((p.Row + dropDistance) * tileSize), tileSize, tileSize), new Color(64, 64, 64, 64));
                 }
+            }
+        }
 
+        private void DrawEnemyGhostTetromino(Tetromino tetromino, int x, int y)
+        {
+            if (tetromino == null) return;
+
+            foreach (Position p in tetromino.BlockPositions())
+            {
+                if (p.Row + enemyDropDistance > 1)
+                {
+                    spriteBatch.Draw(tetrominoTextures[tetromino.TetrominoID], new Rectangle(x + (p.Column * tileSize), y + ((p.Row + enemyDropDistance) * tileSize), tileSize, tileSize), new Color(64, 64, 64, 64));
+                }
             }
         }
 
@@ -301,9 +348,21 @@ namespace TetraClashDec24
             DrawTetromino(next, 650, 540, true);
         }
 
+        private void DrawEnemyPreviewTetromino(Tetromino nextTetromino)
+        {
+            if (nextTetromino == null) return;
+            DrawTetromino(nextTetromino, 1610, 540, true);
+        }
+
         private void DrawHeldTetromino()
         {
             DrawTetromino(gameController.HeldTetromino, 650, 740, true);
+        }
+
+        private void DrawEnemyHeldTetromino(Tetromino heldTetromino)
+        {
+            if (heldTetromino == null) return;
+            DrawTetromino(heldTetromino, 1610, 740, true);
         }
 
         private async Task HandleGameOver()
@@ -323,7 +382,8 @@ namespace TetraClashDec24
                 string fallingTetrominoJson = JsonSerializer.Serialize(gameController.CurrentTetromino);
                 string previewTetrominoJson = JsonSerializer.Serialize(gameController.TetrominoQueue.NextTetromino);
                 string holdTetrominoJson = JsonSerializer.Serialize(gameController.HeldTetromino);
-                string message = $"match:{gridJson}:{fallingTetrominoJson}:{previewTetrominoJson}:{holdTetrominoJson}:{gameController.Level}:{gameController.Score}";
+                string dropDistanceJson = JsonSerializer.Serialize(gameController.TetrominoDropDistance());
+                string message = $"match:{gridJson}:{fallingTetrominoJson}:{previewTetrominoJson}:{holdTetrominoJson}:{gameController.Level}:{gameController.Score}:{dropDistanceJson}";
                 byte[] messageBytes = Encoding.UTF8.GetBytes(message);
                 try
                 {
@@ -371,13 +431,17 @@ namespace TetraClashDec24
                     string[] args = message.Substring("GRID_UPDATE:".Length).Split(':');
                     try
                     {
-                        enemyGrid = JsonSerializer.Deserialize<int[][]>(args[0]);
-                        enemyFallingTetromino = JsonSerializer.Deserialize<Tetromino>(args[1]);
-                        enemyPreviewTetromino = JsonSerializer.Deserialize<Tetromino>(args[2]);
-                        enemyHeldTetromino = JsonSerializer.Deserialize<Tetromino>(args[3]);
-                        enemyLevel = args[4];
-                        enemyScore = args[5];
-                        Console.WriteLine("Received match update.");
+                        if (args.Length >= 7) // Make sure we have all the necessary components
+                        {
+                            enemyGrid = JsonSerializer.Deserialize<int[][]>(args[0]);
+                            enemyFallingTetromino = JsonSerializer.Deserialize<Tetromino>(args[1]);
+                            enemyPreviewTetromino = JsonSerializer.Deserialize<Tetromino>(args[2]);
+                            enemyHeldTetromino = JsonSerializer.Deserialize<Tetromino>(args[3]);
+                            enemyLevel = args[4];
+                            enemyScore = args[5];
+                            enemyDropDistance = JsonSerializer.Deserialize<int>(args[6]);
+                            Console.WriteLine("Received match update.");
+                        }
                     }
                     catch (Exception ex)
                     {

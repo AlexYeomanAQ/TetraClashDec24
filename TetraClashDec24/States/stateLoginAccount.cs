@@ -53,7 +53,7 @@ namespace TetraClashDec24
 
             createAccountButton = new Button(App, 885, 875, 150, 100, Color.White, "Create new account");
 
-            titleTexture = App.Content.Load<Texture2D>(@"tempLogo");
+            titleTexture = App.Content.Load<Texture2D>(@"Logo");
         }
 
 
@@ -131,7 +131,7 @@ namespace TetraClashDec24
             createAccountButton.Draw(spriteBatch);
 
             spriteBatch.DrawString(App.titleFont, "Login", Cogs.centreTextPos(App.titleFont, "Login", 960, 475), Color.White);
-            spriteBatch.Draw(titleTexture, new Rectangle(760, 0, 400, 400), Color.White);
+            spriteBatch.Draw(titleTexture, new Rectangle(580, 100, 745, 329), Color.White);
 
             if (ErrorString != "")
             {

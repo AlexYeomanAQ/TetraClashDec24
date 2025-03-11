@@ -50,7 +50,7 @@ namespace TetraClashDec24
 
             loginButton = new Button(App, 885, 875, 150, 100, Color.White, "Login");
 
-            titleTexture = App.Content.Load<Texture2D>(@"tempLogo");
+            titleTexture = App.Content.Load<Texture2D>(@"Logo");
         }
 
 
@@ -125,7 +125,7 @@ namespace TetraClashDec24
 
             spriteBatch.DrawString(App.titleFont, "Create an Account", Cogs.centreTextPos(App.titleFont, "Create an Account", 960, 475), Color.White);
 
-            spriteBatch.Draw(titleTexture, new Rectangle(760, 0, 400, 400), Color.White);
+            spriteBatch.Draw(titleTexture, new Rectangle(580, 100, 745, 329), Color.White);
 
             usernameBox.Draw(spriteBatch);
             passwordBox.Draw(spriteBatch);
@@ -233,27 +233,30 @@ namespace TetraClashDec24
             App._stream = App._client.GetStream();
             if (!ValidCredentials())
             {
-
-            }
-            string salt = Security.GenerateSalt();
-            string hash = Security.GenerateHash(password, salt);
-            string message = $"create{username}:{hash}:{salt}";
-            string response = await Client.SendMessageAsync(App._stream, message, true);
-
-            if (response.StartsWith("Success"))
-            {
-                await Cogs.saveCache(username, salt);
-                App.Username = username;
-                App.Rating = 1000; //Since all new accounts
-                App.ChangeState(new MainMenuState(App, mouse.LeftButton));
-            }
-            else if (response == "Player Exists")
-            {
-                ErrorString = "Username already exists, please select a new one or log in.";
+                ErrorString = "Username or password is invalid";
             }
             else
             {
-                ErrorString = $"Unknown Error: {response}";
+                string salt = Security.GenerateSalt();
+                string hash = Security.GenerateHash(password, salt);
+                string message = $"create{username}:{hash}:{salt}";
+                string response = await Client.SendMessageAsync(App._stream, message, true);
+
+                if (response.StartsWith("Success"))
+                {
+                    await Cogs.saveCache(username, salt);
+                    App.Username = username;
+                    App.Rating = 1000; //Since all new accounts
+                    App.ChangeState(new MainMenuState(App, mouse.LeftButton));
+                }
+                else if (response == "Player Exists")
+                {
+                    ErrorString = "Username already exists, please select a new one or log in.";
+                }
+                else
+                {
+                    ErrorString = $"Unknown Error: {response}";
+                }
             }
         }
 
