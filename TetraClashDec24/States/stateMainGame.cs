@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Text.Json;
 using System.Text;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
 
 namespace TetraClashDec24
 {
@@ -33,11 +35,10 @@ namespace TetraClashDec24
         private int[][] enemyGrid;
         private string enemyLevel = "0";
         private string enemyScore = "0";
-        private Tetromino enemyFallingTetromino;
-        private Tetromino enemyPreviewTetromino;
-        private Tetromino enemyHeldTetromino;
         private int enemyDropDistance = 0;
 
+        private bool ScoreSent = false;
+        private bool hasPlayedResultSound = false;
         private string MatchResult = "";
         private int RatingAdjustment;
 
@@ -66,6 +67,9 @@ namespace TetraClashDec24
             tetrominoTextures = new Texture2D[8];
 
             gameController = new GameController(seed);
+
+            gameController.BlockLanded += OnBlockLanded;
+            gameController.LinesCleared += OnLinesCleared;
 
             PlayerGridX = 1920 / 4 - (gameController.GameBoard.Collumns * tileSize / 2) - 200;
             PlayerGridY = 1080 / 2 - ((gameController.GameBoard.Rows - 2) * tileSize / 2);
@@ -105,6 +109,8 @@ namespace TetraClashDec24
                 tetrominoTextures[i] = App.Content.Load<Texture2D>(@$"{i}");
             }
 
+            MediaPlayer.IsRepeating = true; // Loops the music
+            MediaPlayer.Volume = 0.5f;
         }
 
         public override void Update(GameTime gameTime)
@@ -112,6 +118,9 @@ namespace TetraClashDec24
             prevKeyboardState = keyboard;
             mouse = Mouse.GetState();
             keyboard = Keyboard.GetState();
+
+            if (MediaPlayer.State != MediaState.Playing && App.gameMusic != null)
+                MediaPlayer.Play(App.gameMusic);
 
             if (MatchResult == "")
             {
@@ -168,6 +177,7 @@ namespace TetraClashDec24
             }
             else
             {
+                MediaPlayer.Stop();
                 if (mouse.LeftButton == ButtonState.Pressed && prevClickState != mouse.LeftButton)
                 {
                     Point mousePosition = new Point(mouse.X, mouse.Y);
@@ -180,6 +190,16 @@ namespace TetraClashDec24
             prevClickState = mouse.LeftButton;
         }
 
+        private void OnBlockLanded(object sender, EventArgs e)
+        {
+            App.sound_TetrominoLand.Play();
+        }
+
+        private void OnLinesCleared(object sender, int numLines)
+        {
+            App.sound_LineClear.Play();
+        }
+
         public override void Draw(GameTime gameTime)
         {
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
@@ -190,33 +210,14 @@ namespace TetraClashDec24
             DrawGhostTetromino(gameController.CurrentTetromino, PlayerGridX, PlayerGridY);
             DrawPreviewTetromino(gameController.TetrominoQueue);
 
-            // Enemy side
-            DrawGrid(enemyGrid, EnemyGridX, EnemyGridY);
-            if (enemyFallingTetromino != null)
-            {
-                DrawTetromino(enemyFallingTetromino, EnemyGridX, EnemyGridY);
-                if (enemyDropDistance > 0)
-                {
-                    DrawEnemyGhostTetromino(enemyFallingTetromino, EnemyGridX, EnemyGridY);
-                }
-            }
-
-            if (enemyPreviewTetromino != null)
-            {
-                DrawEnemyPreviewTetromino(enemyPreviewTetromino);
-            }
-
-            if (enemyHeldTetromino != null)
-            {
-                DrawEnemyHeldTetromino(enemyHeldTetromino);
-            }
-
-            spriteBatch.DrawString(App.titleFont, "Next Tetromino", new Vector2(640, 700), Color.White);
-            spriteBatch.Draw(App.baseTexture, new Rectangle(640, 730, 100, 100), Color.Black);
             if (gameController.HeldTetromino != null)
             {
                 DrawHeldTetromino();
             }
+            // Enemy side
+            DrawGrid(enemyGrid, EnemyGridX, EnemyGridY);
+
+
 
             spriteBatch.DrawString(App.titleFont, "Level", Cogs.centreTextPos(App.titleFont, "Level", 960, 520), Color.White);
             spriteBatch.DrawString(App.titleFont, gameController.Level.ToString(), Cogs.centreTextPos(App.font, gameController.Level.ToString(), 960, 580), Color.White);
@@ -243,6 +244,18 @@ namespace TetraClashDec24
                 spriteBatch.DrawString(App.titleFont, MatchResult, Cogs.centreTextPos(App.titleFont, MatchResult, 960, 540), Color.Black);
                 if (RatingAdjustment != null)
                 {
+                    if (!hasPlayedResultSound)
+                    {
+                        if (RatingAdjustment >= 0)
+                        {
+                            App.sound_Win.Play(0.5f, 0, 0);
+                        }
+                        else
+                        {
+                            App.sound_Lose.Play(0.5f, 0, 0);
+                        }
+                        hasPlayedResultSound = true;
+                    }
                     string ratingAdjustmentString = $"Rating Change: {RatingAdjustment}";
                     spriteBatch.DrawString(App.titleFont, ratingAdjustmentString, Cogs.centreTextPos(App.titleFont, ratingAdjustmentString, 960, 640), Color.Black);
                 }
@@ -288,7 +301,6 @@ namespace TetraClashDec24
                     {
                         await Task.Delay(dropRate);
                     }
-
                     gameController.TranslateTetrominoDown();
                 }
             }
@@ -327,19 +339,6 @@ namespace TetraClashDec24
             }
         }
 
-        private void DrawEnemyGhostTetromino(Tetromino tetromino, int x, int y)
-        {
-            if (tetromino == null) return;
-
-            foreach (Position p in tetromino.BlockPositions())
-            {
-                if (p.Row + enemyDropDistance > 1)
-                {
-                    spriteBatch.Draw(tetrominoTextures[tetromino.TetrominoID], new Rectangle(x + (p.Column * tileSize), y + ((p.Row + enemyDropDistance) * tileSize), tileSize, tileSize), new Color(64, 64, 64, 64));
-                }
-            }
-        }
-
         private void DrawPreviewTetromino(TetrominoQueue tetrominoQueue)
         {
             Tetromino next = tetrominoQueue.NextTetromino;
@@ -348,21 +347,10 @@ namespace TetraClashDec24
             DrawTetromino(next, 650, 540, true);
         }
 
-        private void DrawEnemyPreviewTetromino(Tetromino nextTetromino)
-        {
-            if (nextTetromino == null) return;
-            DrawTetromino(nextTetromino, 1610, 540, true);
-        }
-
         private void DrawHeldTetromino()
         {
+            if (gameController.HeldTetromino == null) return;
             DrawTetromino(gameController.HeldTetromino, 650, 740, true);
-        }
-
-        private void DrawEnemyHeldTetromino(Tetromino heldTetromino)
-        {
-            if (heldTetromino == null) return;
-            DrawTetromino(heldTetromino, 1610, 740, true);
         }
 
         private async Task HandleGameOver()
@@ -406,6 +394,7 @@ namespace TetraClashDec24
 
                     // Serialize the simplified data
                     string gridJson = JsonSerializer.Serialize(gridWithFallingBlocks);
+                    Console.WriteLine(gridJson);
 
                     // Combine all data into a single message
                     string message = $"match:{gridJson}:{gameController.Level}:{gameController.Score}";
@@ -439,61 +428,63 @@ namespace TetraClashDec24
                 try
                 {
                     bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+
+                    if (bytesRead == 0)
+                    {
+                        Console.WriteLine("Disconnected from server.");
+                        break;
+                    }
+
+                    string message = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+                    if (message.StartsWith("GRID_UPDATE:"))
+                    {
+                        string[] args = message.Substring("GRID_UPDATE:".Length).Split(':');
+                        try
+                        {
+                                enemyGrid = JsonSerializer.Deserialize<int[][]>(args[0]);
+                                enemyLevel = args[1];
+                                enemyScore = args[2];
+                                Console.WriteLine("Received match update.");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Error deserializing grid data: " + ex.Message);
+                        }
+                    }
+                    else if (message.StartsWith("MATCH_WIN"))
+                    {
+                        RatingAdjustment = int.Parse(message.Split(':')[1]);
+                        MatchResult = "You win!";
+                        gameController.GameOver = true;
+                        if (!ScoreSent)
+                        {
+                            await Client.SendMessageAsync(stream, $"score{gameController.Score}");
+                            ScoreSent = true;
+                        }
+
+                        break;
+                    }
+                    else if (message.StartsWith("MATCH_LOSE"))
+                    {
+                        MatchResult = "You lose!";
+                        RatingAdjustment = int.Parse(message.Split(':')[1]) * -1;
+                        break;
+                    }
+                    else if (message.StartsWith("MATCH_TIE"))
+                    {
+                        MatchResult = "Tied!";
+                        RatingAdjustment = int.Parse(message.Split(':')[1]);
+                        if (message.Substring(10, 4) == "LOSE")
+                        {
+                            RatingAdjustment *= -1;
+                        }
+                        gameController.GameOver = true;
+                        break;
+                    }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine("Error receiving grid update: " + ex.Message);
-                    break;
-                }
-                if (bytesRead == 0)
-                {
-                    Console.WriteLine("Disconnected from server.");
-                    break;
-                }
-
-                string message = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
-                if (message.StartsWith("GRID_UPDATE:"))
-                {
-                    string[] args = message.Substring("GRID_UPDATE:".Length).Split(':');
-                    try
-                    {
-                        if (args.Length >= 7) // Make sure we have all the necessary components
-                        {
-                            enemyGrid = JsonSerializer.Deserialize<int[][]>(args[0]);
-                            enemyLevel = args[4];
-                            enemyScore = args[5];
-                            enemyDropDistance = JsonSerializer.Deserialize<int>(args[6]);
-                            Console.WriteLine("Received match update.");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Error deserializing grid data: " + ex.Message);
-                    }
-                }
-                else if (message.StartsWith("MATCH_WIN"))
-                {
-                    RatingAdjustment = int.Parse(message.Split(':')[1]);
-                    MatchResult = "You win!";
-                    gameController.GameOver = true;
-                    await Client.SendMessageAsync(stream, $"score{gameController.Score}");
-                    break;
-                }
-                else if (message.StartsWith("MATCH_LOSE"))
-                {
-                    MatchResult = "You lose!";
-                    RatingAdjustment = int.Parse(message.Split(':')[1]) * -1;
-                    break;
-                }
-                else if (message.StartsWith("MATCH_TIE"))
-                {
-                    MatchResult = "Tied!";
-                    RatingAdjustment = int.Parse(message.Split(':')[1]);
-                    if (message.Substring(10, 4) == "LOSE")
-                    {
-                        RatingAdjustment *= -1;
-                    }
-                    gameController.GameOver = true;
                     break;
                 }
             }
@@ -511,6 +502,7 @@ namespace TetraClashDec24
                     Console.WriteLine("Test");
                     gameController.GameOver = true;
                     await Client.SendMessageAsync(App._stream, $"time{gameController.Score}");
+                    ScoreSent = true;
                     break;
                 }
                 await Task.Delay(1000);

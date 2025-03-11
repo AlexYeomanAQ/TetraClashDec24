@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System.Threading.Tasks;
 using System;
 using System.Text;
+using Microsoft.Xna.Framework.Media;
 
 namespace TetraClashDec24
 {
@@ -35,6 +36,7 @@ namespace TetraClashDec24
                 Point mousePosition = new Point(mouse.X, mouse.Y);
                 if (CancelButton.Box.Contains(mousePosition))
                 {
+                    CancelButton.PlaySound();
                     CancelAsync();
                 }
             }
@@ -74,7 +76,7 @@ namespace TetraClashDec24
                         int matchID = int.Parse(args[0]);
                         string username = args[1];
                         Console.WriteLine("Match found! Match ID: " + matchID);
-
+                        MediaPlayer.Stop(); //Stops menu music from continuing
                         App.ChangeState(new MainGameState(App, prevClickState, matchID, matchID, username));
                     }
                     else if (response.StartsWith("Success"))

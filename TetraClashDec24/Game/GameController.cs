@@ -23,6 +23,9 @@ namespace TetraClashDec24
         public Tetromino HeldTetromino { get; private set; }
         public bool CanHold { get; private set; }
 
+        public event EventHandler BlockLanded;
+        public event EventHandler<int> LinesCleared;
+
         public GameController(int seed)
         {
             GameBoard = new GameBoard(22, 10);
@@ -121,6 +124,12 @@ namespace TetraClashDec24
             }
 
             int numRowsCleared = GameBoard.ClearFullLines();
+
+            if (numRowsCleared > 0)
+            {
+                LinesCleared?.Invoke(this, numRowsCleared);
+            }
+
             Score += Cogs.lineClearPoints[numRowsCleared]*(Level+1);
             for (int i = 0; i < numRowsCleared; i++)
             {
@@ -149,6 +158,7 @@ namespace TetraClashDec24
             {
                 CurrentTetromino.Translate(-1, 0);
                 PlaceTetromino();
+                BlockLanded?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -180,6 +190,8 @@ namespace TetraClashDec24
         {
             CurrentTetromino.Translate(TetrominoDropDistance(), 0);
             PlaceTetromino();
+
+            BlockLanded?.Invoke(this, EventArgs.Empty);
         }
     }
 }

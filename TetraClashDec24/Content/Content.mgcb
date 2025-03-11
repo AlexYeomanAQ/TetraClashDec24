@@ -145,6 +145,18 @@
 /processorParam:TextureFormat=Color
 /build:button.png
 
+#begin game.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:game.mp3
+
+#begin game.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:game.mp3
+
 #begin highlight.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -157,6 +169,12 @@
 /processorParam:TextureFormat=Color
 /build:highlight.png
 
+#begin LineClear.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:LineClear.wav
+
 #begin logo.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -168,6 +186,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:logo.png
+
+#begin Lose.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Lose.wav
+
+#begin menu.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:menu.mp3
 
 #begin myFont.spritefont
 /importer:FontDescriptionImporter
@@ -182,10 +212,22 @@
 /processorParam:Quality=Best
 /build:Select.wav
 
+#begin TetrominoLand.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:TetrominoLand.wav
+
 #begin titleFont.spritefont
 /importer:FontDescriptionImporter
 /processor:LocalizedFontProcessor
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
 /build:titleFont.spritefont
+
+#begin Win.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Win.wav
 

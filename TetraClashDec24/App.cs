@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 using System;
 using System.IO;
 using System.Net.Sockets;
@@ -22,7 +23,12 @@ namespace TetraClashDec24
         public Texture2D highlightTexture;
         private Texture2D backgroundTexture;
 
+        public Song gameMusic;
         public SoundEffect sound_ButtonClick;
+        public SoundEffect sound_TetrominoLand;
+        public SoundEffect sound_LineClear;
+        public SoundEffect sound_Lose;
+        public SoundEffect sound_Win;
 
         public TcpClient _client = null;
         public NetworkStream _stream = null;
@@ -62,13 +68,22 @@ namespace TetraClashDec24
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
+
             font = Content.Load<SpriteFont>(@"myFont");
             titleFont = Content.Load<SpriteFont>(@"titleFont");
+
             baseTexture = Content.Load<Texture2D>(@"base");
             buttonTexture = Content.Load<Texture2D>(@"button");
             highlightTexture = Content.Load<Texture2D>(@"highlight");
             backgroundTexture = Content.Load<Texture2D>(@"background");
+
+            gameMusic = Content.Load<Song>(@"game");
             sound_ButtonClick = Content.Load<SoundEffect>(@"Select");
+            sound_TetrominoLand = Content.Load<SoundEffect>(@"TetrominoLand");
+            sound_LineClear = Content.Load<SoundEffect>(@"LineClear");
+            sound_Lose = Content.Load<SoundEffect>(@"Lose");
+            sound_Win = Content.Load<SoundEffect>(@"Win");
+
             _currentState.LoadContent();
         }
 

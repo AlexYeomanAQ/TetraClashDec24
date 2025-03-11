@@ -19,11 +19,6 @@ namespace TetraClashDec24
             Colour = colour;
             Text = text;
         }
-
-        public void LoadContent()
-        {
-            
-        }
         public void Draw(SpriteBatch spriteBatch)
         {
             if (Highlighted)
@@ -46,7 +41,7 @@ namespace TetraClashDec24
 
         public void PlaySound()
         {
-            App.sound_ButtonClick.Play();
+            App.sound_ButtonClick.Play(0.1f, 0, 0);
         }
     }
 }
