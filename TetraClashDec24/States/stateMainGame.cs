@@ -209,31 +209,28 @@ namespace TetraClashDec24
             DrawTetromino(gameController.CurrentTetromino, PlayerGridX, PlayerGridY);
             DrawGhostTetromino(gameController.CurrentTetromino, PlayerGridX, PlayerGridY);
             DrawPreviewTetromino(gameController.TetrominoQueue);
+            DrawHeldTetromino();
 
-            if (gameController.HeldTetromino != null)
-            {
-                DrawHeldTetromino();
-            }
             // Enemy side
             DrawGrid(enemyGrid, EnemyGridX, EnemyGridY);
 
-
-
-            spriteBatch.DrawString(App.titleFont, "Level", Cogs.centreTextPos(App.titleFont, "Level", 960, 520), Color.White);
-            spriteBatch.DrawString(App.titleFont, gameController.Level.ToString(), Cogs.centreTextPos(App.font, gameController.Level.ToString(), 960, 580), Color.White);
-            spriteBatch.DrawString(App.titleFont, "Lines Cleared", Cogs.centreTextPos(App.titleFont, "Lines Cleared", 960, 640), Color.White);
-            spriteBatch.DrawString(App.titleFont, gameController.TotalLinesCleared.ToString(), Cogs.centreTextPos(App.font, gameController.TotalLinesCleared.ToString(), 960, 700), Color.White);
-            spriteBatch.DrawString(App.titleFont, "Score", Cogs.centreTextPos(App.titleFont, "Score", 960, 760), Color.White);
-            spriteBatch.DrawString(App.titleFont, gameController.Score.ToString(), Cogs.centreTextPos(App.font, gameController.Score.ToString(), 960, 820), Color.White);
-            spriteBatch.DrawString(App.titleFont, enemyUsername, Cogs.centreTextPos(App.titleFont, enemyUsername, EnemyGridX+75, EnemyGridY - 30), Color.White);
+            spriteBatch.DrawString(App.titleFont, "You", new Vector2(PlayerGridX + 100, PlayerGridY), Color.White);
+            spriteBatch.DrawString(App.titleFont, "Level", Cogs.centreTextPos(App.titleFont, "Level", 760, 520), Color.White);
+            spriteBatch.DrawString(App.titleFont, gameController.Level.ToString(), Cogs.centreTextPos(App.font, gameController.Level.ToString(), 760, 550), Color.White);
+            spriteBatch.DrawString(App.titleFont, "Lines Cleared", Cogs.centreTextPos(App.titleFont, "Lines Cleared", 760, 640), Color.White);
+            spriteBatch.DrawString(App.titleFont, gameController.TotalLinesCleared.ToString(), Cogs.centreTextPos(App.font, gameController.TotalLinesCleared.ToString(), 760, 670), Color.White);
+            spriteBatch.DrawString(App.titleFont, "Score", Cogs.centreTextPos(App.titleFont, "Score", 760, 760), Color.White);
+            spriteBatch.DrawString(App.titleFont, gameController.Score.ToString(), Cogs.centreTextPos(App.font, gameController.Score.ToString(), 760, 780), Color.White);
+            spriteBatch.DrawString(App.titleFont, enemyUsername, Cogs.centreTextPos(App.titleFont, enemyUsername, EnemyGridX+150, EnemyGridY), Color.White);
             spriteBatch.DrawString(App.titleFont, "Level", Cogs.centreTextPos(App.titleFont, "Level", 1650, 520), Color.White);
-            spriteBatch.DrawString(App.titleFont, enemyLevel, Cogs.centreTextPos(App.font, enemyLevel, 1650, 580), Color.White);
+            spriteBatch.DrawString(App.titleFont, enemyLevel, Cogs.centreTextPos(App.font, enemyLevel, 1650, 550), Color.White);
             spriteBatch.DrawString(App.titleFont, "Score", Cogs.centreTextPos(App.titleFont, "Score", 1650, 640), Color.White);
-            spriteBatch.DrawString(App.titleFont, enemyScore, Cogs.centreTextPos(App.font, enemyScore, 1650, 700), Color.White);
+            spriteBatch.DrawString(App.titleFont, enemyScore, Cogs.centreTextPos(App.font, enemyScore, 1650, 670), Color.White);
 
             if (gameController.GameOver)
             {
                 spriteBatch.Draw(App.baseTexture, new Rectangle(0, 0, 1920, 1080), new Color(64, 64, 64, 64));
+                spriteBatch.Draw(App.baseTexture, new Rectangle(660, 440, 600, 400), new Color(240, 240, 240));
                 spriteBatch.DrawString(App.titleFont, MatchResult, Cogs.centreTextPos(App.titleFont, MatchResult, 960, 540), Color.Black);
                 if (RatingAdjustment != null)
                 {
@@ -335,15 +332,17 @@ namespace TetraClashDec24
         private void DrawPreviewTetromino(TetrominoQueue tetrominoQueue)
         {
             Tetromino next = tetrominoQueue.NextTetromino;
-            spriteBatch.DrawString(App.titleFont, "Next Tetromino", new Vector2(640, 500), Color.White);
-            spriteBatch.Draw(App.baseTexture, new Rectangle(640, 530, 100, 100), Color.Black);
-            DrawTetromino(next, 650, 540, true);
+            spriteBatch.DrawString(App.titleFont, "Next", new Vector2(480, 500), Color.White);
+            spriteBatch.Draw(App.baseTexture, new Rectangle(480, 530, 105, 100), Color.Black);
+            DrawTetromino(next, 490, 545, true);
         }
 
         private void DrawHeldTetromino()
         {
+            spriteBatch.DrawString(App.titleFont, "Hold", new Vector2(480, 670), Color.White);
+            spriteBatch.Draw(App.baseTexture, new Rectangle(480, 700, 115, 100), Color.Black);
             if (gameController.HeldTetromino == null) return;
-            DrawTetromino(gameController.HeldTetromino, 650, 740, true);
+            DrawTetromino(gameController.HeldTetromino, 490, 730, true);
         }
 
         private async Task HandleGameOver()
