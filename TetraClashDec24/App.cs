@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -20,6 +21,8 @@ namespace TetraClashDec24
         public Texture2D buttonTexture;
         public Texture2D highlightTexture;
         private Texture2D backgroundTexture;
+
+        public SoundEffect sound_ButtonClick;
 
         public TcpClient _client = null;
         public NetworkStream _stream = null;
@@ -65,6 +68,7 @@ namespace TetraClashDec24
             buttonTexture = Content.Load<Texture2D>(@"button");
             highlightTexture = Content.Load<Texture2D>(@"highlight");
             backgroundTexture = Content.Load<Texture2D>(@"background");
+            sound_ButtonClick = Content.Load<SoundEffect>(@"Select");
             _currentState.LoadContent();
         }
 

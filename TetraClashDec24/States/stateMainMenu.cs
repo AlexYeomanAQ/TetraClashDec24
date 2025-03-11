@@ -9,19 +9,25 @@ using System.Text.Json;
 
 namespace TetraClashDec24
 {
+    // Define the Highscore DTO so JSON serialization/deserialization works as expected.
+    public class Highscore
+    {
+        public int Score { get; set; }
+        public string Date { get; set; }
+    }
+
     public class MainMenuState : AppState
     {
         SpriteBatch spriteBatch;
-
         Button PlayButton;
-
         private ButtonState prevClickState;
-        List<(int Score, string Date)> highscores;
+        List<Highscore> highscores;
 
         public MainMenuState(App app, ButtonState clickState) : base(app)
         {
             prevClickState = clickState;
             spriteBatch = new SpriteBatch(App.GraphicsDevice);
+            // Fire-and-forget; consider awaiting or handling exceptions as needed.
             FetchHighScores(App._stream, App.Username);
         }
 
@@ -33,12 +39,12 @@ namespace TetraClashDec24
         public override void Update(GameTime gameTime)
         {
             MouseState mouse = Mouse.GetState();
-
             if (mouse.LeftButton == ButtonState.Pressed && prevClickState != mouse.LeftButton)
             {
                 Point mousePosition = new Point(mouse.X, mouse.Y);
                 if (PlayButton.Box.Contains(mousePosition))
                 {
+                    PlayButton.PlaySound();
                     App.ChangeState(new SearchState(App, mouse.LeftButton));
                 }
             }
@@ -54,46 +60,46 @@ namespace TetraClashDec24
             PlayButton.Draw(spriteBatch);
             spriteBatch.End();
         }
+
         public async Task FetchHighScores(NetworkStream stream, string username)
         {
             try
             {
                 string message = $"highscores{username}";
                 string highscoresJson = await Client.SendMessageAsync(stream, message, true);
-                highscores = highscoresJson == null ? JsonSerializer.Deserialize<List<(int Score, string Date)>>(highscoresJson) : null;
+                highscores = highscoresJson != null
+                    ? JsonSerializer.Deserialize<List<Highscore>>(highscoresJson)
+                    : null;
             }
             catch (Exception ex)
             {
-                return;
+                // Optionally log the error.
             }
         }
 
         public void DrawHighscores()
         {
-            if (highscores == null || highscores.Count == 0) return;
+            if (highscores == null || highscores.Count == 0)
+                return;
 
             int startX = 100;
             int startY = 300;
             int lineHeight = 40;
-            Color headerColor = Color.Yellow;
             Color textColor = Color.White;
 
             // Draw header
-            spriteBatch.DrawString(App.font, "Highscores", new Vector2(startX, startY - lineHeight), headerColor);
-            spriteBatch.DrawString(App.font, "Score", new Vector2(startX, startY), headerColor);
-            spriteBatch.DrawString(App.font, "Date", new Vector2(startX + 200, startY), headerColor);
+            spriteBatch.DrawString(App.titleFont, "Highscores", new Vector2(startX+60, startY - 50), textColor);
+            spriteBatch.DrawString(App.titleFont, "Score", new Vector2(startX, startY), textColor, 0f, Vector2.Zero, 0.75f, SpriteEffects.None, 0f);
+            spriteBatch.DrawString(App.titleFont, "Date", new Vector2(startX + 200, startY), textColor, 0f, Vector2.Zero, 0.75f, SpriteEffects.None, 0f);
 
-            // Draw highscores
-            if (highscores.Count > 0)
+            // Draw each highscore entry (up to 10 entries)
+            for (int i = 0; i < Math.Min(highscores.Count, 10); i++)
             {
-                for (int i = 0; i < Math.Min(highscores.Count, 10); i++)
-                {
-                    int yOffset = startY + (i + 1) * lineHeight;
-                    spriteBatch.DrawString(App.font, highscores[i].Score.ToString(),
-                        new Vector2(startX, yOffset), textColor);
-                    spriteBatch.DrawString(App.font, highscores[i].Date.Substring(0, 10),
-                        new Vector2(startX + 200, yOffset), textColor);
-                }
+                int yOffset = startY+10 + (i + 1) * lineHeight;
+                spriteBatch.DrawString(App.font, highscores[i].Score.ToString(), new Vector2(startX, yOffset), textColor);
+                // Substring the date if it is long enough
+                string dateDisplay = highscores[i].Date;
+                spriteBatch.DrawString(App.font, dateDisplay, new Vector2(startX + 200, yOffset), textColor);
             }
         }
     }

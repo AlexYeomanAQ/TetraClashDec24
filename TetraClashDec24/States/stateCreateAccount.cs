@@ -60,24 +60,34 @@ namespace TetraClashDec24
             mouse = Mouse.GetState();
             keyboard = Keyboard.GetState();
 
+            // Process new mouse clicks
             if (mouse.LeftButton == ButtonState.Pressed && prevClickState != mouse.LeftButton)
             {
                 Point mousePosition = new Point(mouse.X, mouse.Y);
-                if (usernameBox.Box.Contains(mousePosition))
+
+                // Handle special buttons first
+                if (submitButton.Box.Contains(mousePosition))
+                {
+                    submitButton.PlaySound();
+                    SubmitAccountAsync();
+                    focusedField = InputField.None;
+                }
+                else if (loginButton.Box.Contains(mousePosition))
+                {
+                    loginButton.PlaySound();
+                    App.ChangeState(new LoginState(App, mouse.LeftButton));
+                    focusedField = InputField.None;
+                }
+                // Then handle text input fields
+                else if (usernameBox.Box.Contains(mousePosition))
                 {
                     focusedField = InputField.Username;
+                    usernameBox.PlaySound();
                 }
                 else if (passwordBox.Box.Contains(mousePosition))
                 {
                     focusedField = InputField.Password;
-                }
-                else if (submitButton.Box.Contains(mousePosition))
-                {
-                    SubmitAccountAsync();
-                }
-                else if (loginButton.Box.Contains(mousePosition))
-                {
-                    App.ChangeState(new LoginState(App, mouse.LeftButton));
+                    passwordBox.PlaySound();
                 }
                 else
                 {
@@ -87,36 +97,37 @@ namespace TetraClashDec24
 
             string input = HandleInput(keyboard, prevKeyboardState, ref isCapsLockOn);
 
-            if (focusedField == InputField.Username)
+            // Determine which field is focused using boolean flags
+            bool isUsernameFocused = focusedField == InputField.Username;
+            bool isPasswordFocused = focusedField == InputField.Password;
+
+            // Update the username field
+            usernameBox.Highlighted = isUsernameFocused;
+            if (isUsernameFocused)
             {
                 username = input;
                 usernameBox.Text = username;
-                usernameBox.Highlighted= true;
             }
-            else if (focusedField == InputField.Password)
+            else if (string.IsNullOrEmpty(username))
+            {
+                usernameBox.Text = UBDefaultString;
+            }
+
+            // Update the password field (masking the input)
+            passwordBox.Highlighted = isPasswordFocused;
+            if (isPasswordFocused)
             {
                 password = input;
                 passwordBox.Text = new string('*', password.Length);
-                passwordBox.Highlighted = true;
             }
-            if (focusedField != InputField.Username)
+            else if (string.IsNullOrEmpty(password))
             {
-                usernameBox.Highlighted = false;
-                if (username == "")
-                {
-                    usernameBox.Text = UBDefaultString;
-                }
+                passwordBox.Text = PBDefaultString;
             }
-            if (focusedField != InputField.Password)
-            {
-                passwordBox.Highlighted = false;
-                if (password == "")
-                {
-                    passwordBox.Text = PBDefaultString;
-                }
-            }
+
             prevClickState = mouse.LeftButton;
         }
+
 
         public override void Draw(GameTime gameTime)
         {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace TetraClashDec24
@@ -19,6 +20,10 @@ namespace TetraClashDec24
             Text = text;
         }
 
+        public void LoadContent()
+        {
+            
+        }
         public void Draw(SpriteBatch spriteBatch)
         {
             if (Highlighted)
@@ -37,6 +42,11 @@ namespace TetraClashDec24
                 float textY = Box.Y + (Box.Height / 2) - (textSize.Y / 2);
                 spriteBatch.DrawString(App.font, Text, new Vector2(textX, textY), Color.Black);
             }
+        }
+
+        public void PlaySound()
+        {
+            App.sound_ButtonClick.Play();
         }
     }
 }

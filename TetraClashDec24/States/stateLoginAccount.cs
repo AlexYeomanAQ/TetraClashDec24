@@ -63,24 +63,32 @@ namespace TetraClashDec24
             mouse = Mouse.GetState();
             keyboard = Keyboard.GetState();
 
+            // Process new mouse clicks
             if (mouse.LeftButton == ButtonState.Pressed && prevClickState != mouse.LeftButton)
             {
                 Point mousePosition = new Point(mouse.X, mouse.Y);
+
                 if (usernameBox.Box.Contains(mousePosition))
                 {
+                    usernameBox.PlaySound();
                     focusedField = InputField.Username;
                 }
                 else if (passwordBox.Box.Contains(mousePosition))
                 {
                     focusedField = InputField.Password;
+                    passwordBox.PlaySound();
                 }
                 else if (createAccountButton.Box.Contains(mousePosition))
                 {
+                    createAccountButton.PlaySound();
                     App.ChangeState(new CreateAccountState(App, mouse.LeftButton));
+                    focusedField = InputField.None;
                 }
                 else if (submitButton.Box.Contains(mousePosition))
                 {
+                    submitButton.PlaySound();
                     LoginAsync();
+                    focusedField = InputField.None;
                 }
                 else
                 {
@@ -90,36 +98,36 @@ namespace TetraClashDec24
 
             string input = HandleInput(keyboard, prevKeyboardState, ref isCapsLockOn);
 
-            if (focusedField == InputField.Username)
+            bool isUsernameFocused = (focusedField == InputField.Username);
+            bool isPasswordFocused = (focusedField == InputField.Password);
+
+            // Update username field
+            if (isUsernameFocused)
             {
                 username = input;
                 usernameBox.Text = username;
-                usernameBox.Highlighted = true;
             }
-            else if (focusedField == InputField.Password)
+            usernameBox.Highlighted = isUsernameFocused;
+            if (!isUsernameFocused && string.IsNullOrEmpty(username))
+            {
+                usernameBox.Text = UBDefaultString;
+            }
+
+            // Update password field (mask input with asterisks)
+            if (isPasswordFocused)
             {
                 password = input;
                 passwordBox.Text = new string('*', password.Length);
-                passwordBox.Highlighted = true;
             }
-            if (focusedField != InputField.Username)
+            passwordBox.Highlighted = isPasswordFocused;
+            if (!isPasswordFocused && string.IsNullOrEmpty(password))
             {
-                usernameBox.Highlighted = false;
-                if (username == "")
-                {
-                    usernameBox.Text = UBDefaultString;
-                }
+                passwordBox.Text = PBDefaultString;
             }
-            if (focusedField != InputField.Password)
-            {
-                passwordBox.Highlighted = false;
-                if (password == "")
-                {
-                    passwordBox.Text = PBDefaultString;
-                }
-            }
+
             prevClickState = mouse.LeftButton;
         }
+
 
         public override void Draw(GameTime gameTime)
         {

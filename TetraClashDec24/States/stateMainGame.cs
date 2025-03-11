@@ -374,30 +374,56 @@ namespace TetraClashDec24
             }
         }
 
+        private int[][] AddFallingBlockToGrid(int[][] grid, Tetromino tetromino)
+        {
+            // Create a deep copy of the grid
+            int[][] tempGrid = new int[grid.Length][];
+            for (int i = 0; i < grid.Length; i++)
+            {
+                tempGrid[i] = new int[grid[i].Length];
+                Array.Copy(grid[i], tempGrid[i], grid[i].Length);
+            }
+
+            // Add the tetromino to the copy
+            if (tetromino != null)
+            {
+                foreach (Position p in tetromino.BlockPositions())
+                {
+                    tempGrid[p.Row][p.Column] = tetromino.TetrominoID;
+                }
+            }
+            return tempGrid;
+        }
+
         private async Task SendGridUpdatesAsync(NetworkStream stream)
         {
             while (true)
             {
-                string gridJson = JsonSerializer.Serialize(gameController.GameBoard.grid);
-                string fallingTetrominoJson = JsonSerializer.Serialize(gameController.CurrentTetromino);
-                string previewTetrominoJson = JsonSerializer.Serialize(gameController.TetrominoQueue.NextTetromino);
-                string holdTetrominoJson = JsonSerializer.Serialize(gameController.HeldTetromino);
-                string dropDistanceJson = JsonSerializer.Serialize(gameController.TetrominoDropDistance());
-                string message = $"match:{gridJson}:{fallingTetrominoJson}:{previewTetrominoJson}:{holdTetrominoJson}:{gameController.Level}:{gameController.Score}:{dropDistanceJson}";
-                byte[] messageBytes = Encoding.UTF8.GetBytes(message);
                 try
                 {
+                    // Create a deep copy of the grid with falling blocks
+                    int[][] gridWithFallingBlocks = AddFallingBlockToGrid(gameController.GameBoard.grid, gameController.CurrentTetromino);
+
+                    // Serialize the simplified data
+                    string gridJson = JsonSerializer.Serialize(gridWithFallingBlocks);
+
+                    // Combine all data into a single message
+                    string message = $"match:{gridJson}:{gameController.Level}:{gameController.Score}";
+                    byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+
                     await stream.WriteAsync(messageBytes, 0, messageBytes.Length);
                     Console.WriteLine("Sent grid update");
+
+                    await Task.Delay(dropRate);
+
+                    if (gameController.GameOver)
+                    {
+                        break;
+                    }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine("Error sending grid update: " + ex.Message);
-                    break;
-                }
-                await Task.Delay(dropRate); // Delay before sending the next update.
-                if (gameController.GameOver)
-                {
                     break;
                 }
             }
@@ -434,9 +460,22 @@ namespace TetraClashDec24
                         if (args.Length >= 7) // Make sure we have all the necessary components
                         {
                             enemyGrid = JsonSerializer.Deserialize<int[][]>(args[0]);
-                            enemyFallingTetromino = JsonSerializer.Deserialize<Tetromino>(args[1]);
-                            enemyPreviewTetromino = JsonSerializer.Deserialize<Tetromino>(args[2]);
-                            enemyHeldTetromino = JsonSerializer.Deserialize<Tetromino>(args[3]);
+
+                            // Deserialize the simplified tetromino data
+                            TetrominoData fallingTetrominoData = JsonSerializer.Deserialize<TetrominoData>(args[1]);
+                            TetrominoData previewTetrominoData = JsonSerializer.Deserialize<TetrominoData>(args[2]);
+                            TetrominoData holdTetrominoData = JsonSerializer.Deserialize<TetrominoData>(args[3]);
+
+                            // Recreate the tetrominos from the data
+                            enemyFallingTetromino = fallingTetrominoData != null ?
+                                new Tetromino(fallingTetrominoData.Id, fallingTetrominoData.OffsetRow, fallingTetrominoData.OffsetColumn, fallingTetrominoData.RotationState) : null;
+
+                            enemyPreviewTetromino = previewTetrominoData != null ?
+                                new Tetromino(previewTetrominoData.Id, 0, 0, previewTetrominoData.RotationState) : null;
+
+                            enemyHeldTetromino = holdTetrominoData != null ?
+                                new Tetromino(holdTetrominoData.Id, 0, 0, holdTetrominoData.RotationState) : null;
+
                             enemyLevel = args[4];
                             enemyScore = args[5];
                             enemyDropDistance = JsonSerializer.Deserialize<int>(args[6]);
