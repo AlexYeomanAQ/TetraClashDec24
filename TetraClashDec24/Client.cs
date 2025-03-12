@@ -31,7 +31,7 @@ namespace TetraClashDec24
                     string responseMessage = Encoding.UTF8.GetString(responseBuffer, 0, bytesRead);
 
                     // Log the 'response' boolean value (this might be intended to log the received responseMessage).
-                    Console.WriteLine(response);
+                    Console.WriteLine("Received: " + response);
 
                     // Return the response message with newline characters removed.
                     return responseMessage.Replace("\n", "");

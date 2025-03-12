@@ -128,7 +128,7 @@ namespace TetraClashDec24
             catch (Exception ex)
             {
                 // If an exception occurs, write the error message to the console.
-                await Console.Out.WriteLineAsync(ex.Message);
+                await Console.Out.WriteLineAsync("Error" + ex.Message);
             }
         }
 
