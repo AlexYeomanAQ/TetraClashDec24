@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Text.Json;
 using System.Text;
-using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Media;
 
 namespace TetraClashDec24
@@ -35,7 +34,6 @@ namespace TetraClashDec24
         private int[][] enemyGrid;
         private string enemyLevel = "0";
         private string enemyScore = "0";
-        private int enemyDropDistance = 0;
 
         private bool ScoreSent = false;
         private bool hasPlayedResultSound = false;
