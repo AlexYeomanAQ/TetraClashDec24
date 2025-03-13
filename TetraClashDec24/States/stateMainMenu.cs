@@ -7,7 +7,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Text.Json;
 using Microsoft.Xna.Framework.Media;
-using System.Reflection.Metadata;
+using SharpDX.MediaFoundation;
 
 namespace TetraClashDec24
 {
@@ -186,12 +186,14 @@ namespace TetraClashDec24
             // Set starting positions and line height for the control instructions.
             int startY = helpMenuBackground.Y + 120;
             int leftX = helpMenuBackground.X + 100;
-            int lineHeight = 40;
+            int lineHeight = 35;
 
             // Define an array of control instructions.
             string[] controls = {
                 "Left Arrow: Move piece left",
                 "Right Arrow: Move piece right",
+                "Down Arrow: Increase speed of Falling Piece",
+                "Up Arrow: Instantly Drop Falling Piece",
                 "Z: Rotate piece anticlockwise",
                 "X: Rotate piece clockwise",
                 "C: Hold the currently falling block"
@@ -231,9 +233,6 @@ namespace TetraClashDec24
         public void DrawHighscores()
         {
             // If no highscores exist, do not draw anything.
-            if (highscores == null || highscores.Count == 0)
-                return;
-
             // Define starting positions and styling for the highscore list.
             int startX = 100;
             int startY = 300;
@@ -246,16 +245,24 @@ namespace TetraClashDec24
             spriteBatch.DrawString(App.titleFont, "Score", new Vector2(startX, startY), textColor, 0f, Vector2.Zero, 0.75f, SpriteEffects.None, 0f);
             spriteBatch.DrawString(App.titleFont, "Date", new Vector2(startX + 200, startY), textColor, 0f, Vector2.Zero, 0.75f, SpriteEffects.None, 0f);
 
-            // Loop through the highscores (up to 10 entries) and draw each.
-            for (int i = 0; i < Math.Min(highscores.Count, 10); i++)
+            if (highscores == null || highscores.Count == 0)
             {
-                int yOffset = startY + 10 + (i + 1) * lineHeight;
-                // Draw the score.
-                spriteBatch.DrawString(App.font, highscores[i].Score.ToString(), new Vector2(startX, yOffset), textColor);
-                // Draw the date; consider truncating if it is too long.
-                string dateDisplay = highscores[i].Date;
-                spriteBatch.DrawString(App.font, dateDisplay, new Vector2(startX + 200, yOffset), textColor);
+                spriteBatch.DrawString(App.font, "No Highscores Loaded!", new Vector2(startX, startY + 50), textColor); //If no high scores are loaded from player, display generic message
             }
+            else
+            {
+                for (int i = 0; i < Math.Min(highscores.Count, 10); i++)
+                {
+                    int yOffset = startY + 10 + (i + 1) * lineHeight;
+                    // Draw the score.
+                    spriteBatch.DrawString(App.font, highscores[i].Score.ToString(), new Vector2(startX, yOffset), textColor);
+                    // Draw the date; consider truncating if it is too long.
+                    string dateDisplay = highscores[i].Date;
+                    spriteBatch.DrawString(App.font, dateDisplay, new Vector2(startX + 200, yOffset), textColor);
+                }
+            }
+            // Loop through the highscores (up to 10 entries) and draw each.
+            
         }
     }
 }

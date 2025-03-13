@@ -11,7 +11,9 @@
             new Position[]
             {
                 new (0, 1),
-                new (1, 0),
+                new (1, 0),  
+                new (1, 1),  
+                new (1, 2)  
             },
             // Rotation state 1: rotated 90 degrees clockwise.
             new Position[]

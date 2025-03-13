@@ -30,24 +30,6 @@ namespace TetraClashDec24
         // The index corresponds to the number of lines cleared (e.g., 0 for no lines, 1 for one line, etc.).
         public static int[] lineClearPoints = { 0, 40, 100, 300, 1200 };
 
-        // Calculates a centered position for a given text string.
-        // Parameters:
-        // - font: The SpriteFont used to measure the text.
-        // - text: The text to be centered.
-        // - x, y: The coordinates around which the text should be centered.
-        // Returns a Vector2 representing the top-left position for drawing the text so that it is centered.
-        public static Vector2 centreTextPos(SpriteFont font, string text, int x, int y)
-        {
-            // Measure the size of the text.
-            Vector2 textSize = font.MeasureString(text);
-            // Calculate the X coordinate for centered text.
-            float textX = x - (textSize.X / 2);
-            // Calculate the Y coordinate for centered text.
-            float textY = y - (textSize.Y / 2);
-            // Return the calculated position (rounded to an integer for pixel alignment).
-            return new Vector2((int)textX, (int)textY);
-        }
-
         // Determines the drop rate (in milliseconds) for tetrominoes based on the current game level.
         // The drop rate is calculated using a switch expression to convert a level to a specific number of frames.
         // It then converts frames to milliseconds, assuming a 60 frames per second (FPS) rate.
@@ -78,6 +60,26 @@ namespace TetraClashDec24
             // Return the drop rate in milliseconds.
             return frames * millisecondsPerFrame;
         }
+
+
+        // Calculates a centered position for a given text string.
+        // Parameters:
+        // - font: The SpriteFont used to measure the text.
+        // - text: The text to be centered.
+        // - x, y: The coordinates around which the text should be centered.
+        // Returns a Vector2 representing the top-left position for drawing the text so that it is centered.
+        public static Vector2 centreTextPos(SpriteFont font, string text, int x, int y)
+        {
+            // Measure the size of the text.
+            Vector2 textSize = font.MeasureString(text);
+            // Calculate the X coordinate for centered text.
+            float textX = x - (textSize.X / 2);
+            // Calculate the Y coordinate for centered text.
+            float textY = y - (textSize.Y / 2);
+            // Return the calculated position (rounded to an integer for pixel alignment).
+            return new Vector2((int)textX, (int)textY);
+        }
+
 
         // Asynchronously saves a cache file with the user's username and salt.
         // This method writes the username and salt to a file called "cache.txt", separated by a newline.

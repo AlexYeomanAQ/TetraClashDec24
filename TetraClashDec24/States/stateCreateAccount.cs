@@ -291,11 +291,8 @@ namespace TetraClashDec24
             // Connect to the server on localhost at port 5000.
             App._client = new TcpClient("localhost", 5000);
             App._stream = App._client.GetStream();
-            // Validate the entered username and password.
-            if (!ValidCredentials())
-            {
-                ErrorString = "Username or password is invalid";
-            }
+
+            if (!ValidCredentials()) return;            // Validate the entered username and password.
             else
             {
                 // Generate a secure random salt.
@@ -337,12 +334,14 @@ namespace TetraClashDec24
             // Username must be between 5 and 15 characters.
             if (username.Length < 5 || username.Length > 15)
             {
+                ErrorString = "Username is invalid length";
                 return false;
             }
             // Password must have at least one special character, one digit, and be at least 8 characters long.
             string regex = @"^(?=.*[!@#$%^&*()_+\-=\[\]{};':""\\|,.<>\/?])(?=.*[0-9]).{8,}$";
             if (!Regex.IsMatch(password, regex))
             {
+                ErrorString = "Password is not strong enough";
                 return false;
             }
             return true;

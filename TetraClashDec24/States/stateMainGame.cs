@@ -15,7 +15,6 @@ namespace TetraClashDec24 // Define the TetraClashDec24 namespace
     {
         private SpriteBatch spriteBatch; // SpriteBatch used for drawing textures onto the screen. 
         private Texture2D[] tetrominoTextures; // Array holding textures for each tetromino type.
-        private Texture2D gridTexture; // Texture for the grid (if used).
 
         private int tileSize = 25; // Size of each tile in the grid.
         private int PlayerGridX; // X-coordinate where the player's grid is drawn.
@@ -23,7 +22,6 @@ namespace TetraClashDec24 // Define the TetraClashDec24 namespace
         private int EnemyGridX;  // X-coordinate where the enemy's grid is drawn.
         private int EnemyGridY;  // Y-coordinate where the enemy's grid is drawn.
 
-        private int dropTimer; // Timer used to track drop intervals.
         private int dropRate;  // Current rate at which tetrominos drop.
         private bool fastDrop; // Flag to indicate if fast drop is enabled.
 
@@ -52,7 +50,7 @@ namespace TetraClashDec24 // Define the TetraClashDec24 namespace
         private ButtonState prevClickState; // Previous frame's mouse click state.
 
         private DateTime matchStartTime; // Time when the match started.
-        private TimeSpan matchDuration = TimeSpan.FromMinutes(1); // Total match duration (1 minute).
+        private TimeSpan matchDuration = TimeSpan.FromMinutes(10); // Total match duration (10 minutes).
 
         // Modified constructor: accepts TcpClient instead of a NetworkStream.
         public MainGameState(App app, ButtonState clickState, long matchID, int seed, string enemy_username) : base(app)
@@ -68,7 +66,6 @@ namespace TetraClashDec24 // Define the TetraClashDec24 namespace
             enemyUsername = enemy_username; // Set the enemy's username.
             EnemyGridX = 1920 * 3 / 4 - (gameController.GameBoard.Collumns * tileSize / 2) - 200; // Calculate enemy's grid X position.
             EnemyGridY = PlayerGridY; // Set enemy grid Y position to match player's grid Y.
-            dropTimer = 0; // Initialize drop timer to 0.
             dropRate = Cogs.getDropRate(gameController.Level); // Set drop rate based on the current level.
             MatchID = matchID; // Assign the match ID.
             matchStartTime = DateTimeOffset.FromUnixTimeSeconds(MatchID).UtcDateTime; // Convert matchID into a UTC DateTime.
@@ -158,18 +155,18 @@ namespace TetraClashDec24 // Define the TetraClashDec24 namespace
             DrawHeldTetromino(); // Draw held tetromino.
             DrawGrid(enemyGrid, EnemyGridX, EnemyGridY); // Draw enemy's grid.
 
-            spriteBatch.DrawString(App.titleFont, "You", new Vector2(PlayerGridX + 100, PlayerGridY), Color.White); // Draw "You" label on player's side.
+            spriteBatch.DrawString(App.titleFont, "You", new Vector2(PlayerGridX + 85, PlayerGridY), Color.White); // Draw "You" label on player's side.
             spriteBatch.DrawString(App.titleFont, "Level", Cogs.centreTextPos(App.titleFont, "Level", 760, 520), Color.White); // Draw "Level" label.
             spriteBatch.DrawString(App.titleFont, gameController.Level.ToString(), Cogs.centreTextPos(App.font, gameController.Level.ToString(), 760, 550), Color.White); // Draw player's level.
             spriteBatch.DrawString(App.titleFont, "Lines Cleared", Cogs.centreTextPos(App.titleFont, "Lines Cleared", 760, 640), Color.White); // Draw "Lines Cleared" label.
             spriteBatch.DrawString(App.titleFont, gameController.TotalLinesCleared.ToString(), Cogs.centreTextPos(App.font, gameController.TotalLinesCleared.ToString(), 760, 670), Color.White); // Draw total lines cleared.
             spriteBatch.DrawString(App.titleFont, "Score", Cogs.centreTextPos(App.titleFont, "Score", 760, 760), Color.White); // Draw "Score" label.
             spriteBatch.DrawString(App.titleFont, gameController.Score.ToString(), Cogs.centreTextPos(App.font, gameController.Score.ToString(), 760, 780), Color.White); // Draw player's score.
-            spriteBatch.DrawString(App.titleFont, enemyUsername, Cogs.centreTextPos(App.titleFont, enemyUsername, EnemyGridX + 150, EnemyGridY), Color.White); // Draw enemy username.
-            spriteBatch.DrawString(App.titleFont, "Level", Cogs.centreTextPos(App.titleFont, "Level", 1650, 520), Color.White); // Draw enemy "Level" label.
-            spriteBatch.DrawString(App.titleFont, enemyLevel, Cogs.centreTextPos(App.font, enemyLevel, 1650, 550), Color.White); // Draw enemy level.
-            spriteBatch.DrawString(App.titleFont, "Score", Cogs.centreTextPos(App.titleFont, "Score", 1650, 640), Color.White); // Draw enemy "Score" label.
-            spriteBatch.DrawString(App.titleFont, enemyScore, Cogs.centreTextPos(App.font, enemyScore, 1650, 670), Color.White); // Draw enemy score.
+            spriteBatch.DrawString(App.titleFont, enemyUsername, Cogs.centreTextPos(App.titleFont, enemyUsername, EnemyGridX + 130, EnemyGridY+32), Color.White); // Draw enemy username.
+            spriteBatch.DrawString(App.titleFont, "Level", Cogs.centreTextPos(App.titleFont, "Level", 1500, 520), Color.White); // Draw enemy "Level" label.
+            spriteBatch.DrawString(App.titleFont, enemyLevel, Cogs.centreTextPos(App.font, enemyLevel, 1500, 550), Color.White); // Draw enemy level.
+            spriteBatch.DrawString(App.titleFont, "Score", Cogs.centreTextPos(App.titleFont, "Score", 1500, 640), Color.White); // Draw enemy "Score" label.
+            spriteBatch.DrawString(App.titleFont, enemyScore, Cogs.centreTextPos(App.font, enemyScore, 1500, 670), Color.White); // Draw enemy score.
             if (gameController.GameOver) // If the game is over...
             {
                 spriteBatch.Draw(App.baseTexture, new Rectangle(0, 0, 1920, 1080), new Color(64, 64, 64, 64)); // Draw semi-transparent overlay.
@@ -258,16 +255,16 @@ namespace TetraClashDec24 // Define the TetraClashDec24 namespace
         private void DrawPreviewTetromino(TetrominoQueue tetrominoQueue)
         {
             Tetromino next = tetrominoQueue.NextTetromino; // Get the next tetromino.
-            spriteBatch.DrawString(App.titleFont, "Next", new Vector2(480, 500), Color.White); // Draw "Next" label.
-            spriteBatch.Draw(App.baseTexture, new Rectangle(480, 530, 105, 100), Color.Black); // Draw preview background.
+            spriteBatch.DrawString(App.titleFont, "Next", new Vector2(480, 490), Color.White); // Draw "Next" label.
+            spriteBatch.Draw(App.baseTexture, new Rectangle(480, 530, 110, 100), Color.Black); // Draw preview background.
             DrawTetromino(next, 490, 545, true); // Draw the next tetromino with offsets ignored.
         }
 
         // DrawHeldTetromino renders the tetromino that the player is holding.
         private void DrawHeldTetromino()
         {
-            spriteBatch.DrawString(App.titleFont, "Hold", new Vector2(480, 670), Color.White); // Draw "Hold" label.
-            spriteBatch.Draw(App.baseTexture, new Rectangle(480, 700, 115, 100), Color.Black); // Draw hold box background.
+            spriteBatch.DrawString(App.titleFont, "Hold", new Vector2(480, 660), Color.White); // Draw "Hold" label.
+            spriteBatch.Draw(App.baseTexture, new Rectangle(480, 700, 110, 100), Color.Black); // Draw hold box background.
             if (gameController.HeldTetromino == null) return; // Exit if no tetromino is held.
             DrawTetromino(gameController.HeldTetromino, 490, 730, true); // Draw the held tetromino.
         }
